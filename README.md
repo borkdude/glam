@@ -20,6 +20,10 @@ E.g. in the CPM repo's `test-resources` directory, there is `babashka.cpm.edn`:
  [{:os/name "Mac.*"
    :os/arch "x86_64"
    :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-macos-amd64.zip"
+   :artifact/executables ["bb"]}
+  {:os/name "Linux.*"
+   :os/arch "amd64"
+   :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-linux-amd64.zip"
    :artifact/executables ["bb"]}]}
 ```
 
