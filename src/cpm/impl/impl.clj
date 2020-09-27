@@ -23,6 +23,15 @@
                    (re-matches (re-pattern os-arch) (:os/arch os))))
             artifacts)))
 
+(defn read-bytes ^bytes [^java.io.InputStream is]
+  (let [baos (java.io.ByteArrayOutputStream.)]
+    (loop []
+      (let [b (.read is)]
+        (if-not (= -1 b)
+          (do (.write baos b)
+              (recur))
+          (.toByteArray baos))))))
+
 (defn unzip [^java.io.File zip-file ^java.io.File destination-dir executables verbose?]
   (when verbose? (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
   (let [output-path (.toPath destination-dir)
@@ -44,12 +53,15 @@
                       (Files/createDirectories (.getParent new-path) (into-array [])))
                     (with-open [bos (Files/newOutputStream resolved-path
                                                            (into-array java.nio.file.OpenOption []))]
-                      (let [buf (byte-array (Math/toIntExact (.getSize entry)))]
-                        (loop []
-                          (let [loc (.read zis buf)]
-                            (when-not (= -1 loc)
-                              (.write bos buf 0 loc)
-                              (recur))))))
+                      (let [size (.getSize entry)]
+                        (if (= -1 size)
+                          (.write bos (read-bytes zis))
+                          (let [buf (byte-array (Math/toIntExact size))]
+                            (loop []
+                              (let [loc (.read zis buf)]
+                                (when-not (= -1 loc)
+                                  (.write bos buf 0 loc)
+                                  (recur))))))))
                     (when (contains? executables entry-name)
                       (let [f (.toFile resolved-path)]
                         (when verbose? (warn "Making" (.getPath f) "executable."))

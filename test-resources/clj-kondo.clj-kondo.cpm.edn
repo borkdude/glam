@@ -10,4 +10,8 @@
   {:os/name "Linux.*"
    :os/arch "amd64"
    :artifact/url "https://github.com/borkdude/clj-kondo/releases/download/v2020.09.09/clj-kondo-2020.09.09-linux-amd64.zip"
-   :artifact/executables ["clj-kondo"]}]}
+   :artifact/executables ["clj-kondo"]}
+  {:os/name "Windows.*"
+   :os/arch "amd64"
+   :artifact/url "https://github.com/borkdude/clj-kondo/releases/download/v2020.09.09/clj-kondo-2020.09.09-windows-amd64.zip"
+   :artifact/executables ["clj-kondo.exe"]}]}
