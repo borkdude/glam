@@ -6,4 +6,8 @@
  [{:os/name "Mac.*"
    :os/arch "x86_64"
    :artifact/url "https://github.com/borkdude/clj-kondo/releases/download/v2020.09.09/clj-kondo-2020.09.09-macos-amd64.zip"
+   :artifact/executables ["clj-kondo"]}
+  {:os/name "Linux.*"
+   :os/arch "amd64"
+   :artifact/url "https://github.com/borkdude/clj-kondo/releases/download/v2020.09.09/clj-kondo-2020.09.09-linux-amd64.zip"
    :artifact/executables ["clj-kondo"]}]}
