@@ -1,0 +1,9 @@
+{:package/name clj-kondo/clj-kondo
+ :package/description ""
+ :package/version "2020.09.09"
+ :package/license ""
+ :package/artifacts
+ [{:os/name "Mac.*"
+   :os/arch "x86_64"
+   :artifact/url "https://github.com/borkdude/clj-kondo/releases/download/v2020.09.09/clj-kondo-2020.09.09-macos-amd64.zip"
+   :artifact/executables ["clj-kondo"]}]}
