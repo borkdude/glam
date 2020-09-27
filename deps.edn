@@ -1,0 +1,2 @@
+{:aliases
+ {:test {:extra-paths ["test-resources"]}}}
