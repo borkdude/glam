@@ -24,7 +24,11 @@ E.g. in the CPM repo's `test-resources` directory, there is `org.babashka.babash
   {:os/name "Linux.*"
    :os/arch "amd64"
    :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-linux-amd64.zip"
-   :artifact/executables ["bb"]}]}
+   :artifact/executables ["bb"]}
+  {:os/name "Windows.*"
+   :os/arch "amd64"
+   :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-windows-amd64.zip"
+   :artifact/executables ["bb.exe"]}]}
 ```
 
 We need to use `-A:test` to bring this package into scope (on the classpath).
