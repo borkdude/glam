@@ -64,6 +64,16 @@ $ bb '(+ 1 2 3)'
 6
 ```
 
+CPM can also run with babashka for fast startup (requires version from master, check CircleCI artifacts):
+
+``` clojure
+$ bb -cp src:test-resources -m cpm.main clj-kondo
+/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
+export PATH=$(bb -cp src:test-resources -m cpm.main clj-kondo):$PATH
+$ which clj-kondo
+/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09/clj-kondo
+```
+
 ## TODO
 
 - [ ] Make everything work with GraalVM for fast startup
