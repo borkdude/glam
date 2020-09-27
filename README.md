@@ -44,7 +44,7 @@ Making /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/bb executable.
 ;; return value:
 #object[java.io.File 0x29a98d9f "/Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1"]
 
-user=> (api/resolve-pkg {:package "babashka" :verbose true})
+user=> (api/resolve-pkg {:package 'org.babashka/babashka :verbose true})
 ;; return value:
 #object[java.io.File 0x2a869a16 "/Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1"]
 ```
