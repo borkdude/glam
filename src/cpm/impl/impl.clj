@@ -81,9 +81,11 @@
 
 (defn find-package-descriptor [package]
   (if (not (map? package))
-    (when-let [f (io/resource (str package ".cpm.edn"))]
-      (let [pkg (edn/read-string (slurp f))]
-        pkg))
+    (let [package (str/replace (str package) "/" ".")
+          resource (str package ".cpm.edn")]
+      (when-let [f (io/resource resource)]
+        (let [pkg (edn/read-string (slurp f))]
+          pkg)))
     package))
 
 (defn install-package [package force? verbose?]

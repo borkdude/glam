@@ -9,7 +9,7 @@ Work in progress, not ready for production, breaking changes will happen.
 
 Place `<package-name>.cpm.edn` in your Clojure dependency.
 
-E.g. in the CPM repo's `test-resources` directory, there is `babashka.cpm.edn`:
+E.g. in the CPM repo's `test-resources` directory, there is `org.babashka.babashka.cpm.edn`:
 
 ``` clojure
 {:package/name org.babashka/babashka
@@ -36,7 +36,7 @@ $ clj -A:test
 Clojure 1.10.1
 user=> (require '[cpm.api :as api])
 nil
-user=> (api/resolve-pkg {:package "babashka" :force true :verbose true})
+user=> (api/resolve-pkg {:package 'org.babashka/babashka :force true :verbose true})
 ;; output to stderr:
 Downloading https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-macos-amd64.zip to /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/babashka-0.2.1-macos-amd64.zip
 Unzipping /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/babashka-0.2.1-macos-amd64.zip to /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1
@@ -52,14 +52,14 @@ user=> (api/resolve-pkg {:package "babashka" :verbose true})
 To create a path with packages (this implicitly resolves the packages like above):
 
 ``` clojure
-$ clojure -M:test -m cpm.main --packages clj-kondo babashka
+$ clojure -M:test -m cpm.main --packages clj-kondo/clj-kondo org.babashka/babashka
 /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1:/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
 ```
 
 The resulting path can then be used to add programs on the path for the current shell:
 
 ``` clojure
-$ export PATH=$(clojure -M:test -m cpm.main --packages clj-kondo babashka):$PATH
+$ export PATH=$(clojure -M:test -m cpm.main --packages clj-kondo/clj-kondo org.babashka/babashka):$PATH
 $ which bb
 /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/bb
 $ which clj-kondo
@@ -71,7 +71,7 @@ $ bb '(+ 1 2 3)'
 CPM can also run with [babashka](https://github.com/borkdude/babashka) for fast startup (requires version from master, check CircleCI artifacts):
 
 ``` clojure
-$ bb -cp src:test-resources -m cpm.main --packages clj-kondo
+$ bb -cp src:test-resources -m cpm.main --packages clj-kondo/clj-kondo
 /Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
 export PATH=$(bb -cp src:test-resources -m cpm.main clj-kondo):$PATH
 $ which clj-kondo
