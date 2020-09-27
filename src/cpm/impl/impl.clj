@@ -23,30 +23,37 @@
                    (re-matches (re-pattern os-arch) (:os/arch os))))
             artifacts)))
 
-(defn unzip [^java.io.File zip-file ^java.io.File destination-dir verbose?]
+(defn unzip [^java.io.File zip-file ^java.io.File destination-dir executables verbose?]
   (when verbose? (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
   (let [output-path (.toPath destination-dir)
         zip-file (io/file zip-file)
-        _ (.mkdirs (io/file destination-dir))]
+        _ (.mkdirs (io/file destination-dir))
+        executables (set executables)]
     (with-open
       [fis (Files/newInputStream (.toPath zip-file) (into-array java.nio.file.OpenOption []))
        zis (java.util.zip.ZipInputStream. fis)]
       (loop []
         (let [entry (.getNextEntry zis)]
           (when entry
-            (let [new-path (.resolve output-path (.getName entry))]
+            (let [entry-name (.getName entry)
+                  new-path (.resolve output-path entry-name)
+                  resolved-path (.resolve output-path new-path)]
               (if (.isDirectory entry)
                 (Files/createDirectories new-path (into-array []))
                 (do (when-not (Files/exists (.getParent new-path) (into-array java.nio.file.LinkOption []))
                       (Files/createDirectories (.getParent new-path) (into-array [])))
-                    (with-open [bos (Files/newOutputStream (.resolve output-path new-path)
+                    (with-open [bos (Files/newOutputStream resolved-path
                                                            (into-array java.nio.file.OpenOption []))]
                       (let [buf (byte-array (Math/toIntExact (.getSize entry)))]
                         (loop []
                           (let [loc (.read zis buf)]
                             (when-not (= -1 loc)
                               (.write bos buf 0 loc)
-                              (recur)))))))))
+                              (recur))))))
+                    (when (contains? executables entry-name)
+                      (let [f (.toFile resolved-path)]
+                        (when verbose? (warn "Making" (.getPath f) "executable."))
+                        (.setExecutable f true))))))
             (recur)))))))
 
 (defn download [source ^java.io.File dest verbose?]
@@ -56,8 +63,10 @@
         conn ^HttpURLConnection (.openConnection ^URL source)]
     (.setInstanceFollowRedirects conn true)
     (.connect conn)
+    (io/make-parents dest)
     (with-open [is (.getInputStream conn)]
-      (io/copy is dest))))
+      (io/copy is dest))
+    (when verbose? (warn "Download complete."))))
 
 (defn destination-dir
   ^java.io.File
@@ -87,7 +96,9 @@
                     dest-file (io/file dest-dir file-name)]
                 (when (or force? (not (.exists dest-file)))
                   (download url dest-file verbose?)
-                  (unzip dest-file dest-dir verbose?))
+                  (unzip dest-file dest-dir
+                         (:artifact/executables artifact)
+                         verbose?))
                 (.getPath dest-dir))) artifacts)
       dest-dir)))
 
