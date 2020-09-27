@@ -24,12 +24,23 @@ E.g. in the CPM repo's `test-resources` directory, there is `babashka.cpm.edn`:
 
 We need to use `-A:test` to bring this package into scope (on the classpath).
 
-To resolve the package, invoke:
+To resolve a package, invoke:
 
 ``` clojure
-$ clojure -A:test -X cpm.api/resolve-pkg :package babashka :force true :verbose true
+$ clj -A:test
+Clojure 1.10.1
+user=> (require '[cpm.api :as api])
+nil
+user=> (api/resolve-pkg {:package "babashka" :force true :verbose true})
+;; output to stderr:
 Downloading https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-macos-amd64.zip to /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/babashka-0.2.1-macos-amd64.zip
 Unzipping /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/babashka-0.2.1-macos-amd64.zip to /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1
+;; return value:
+#object[java.io.File 0x29a98d9f "/Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1"]
+
+user=> (api/resolve-pkg {:package "babashka" :verbose true})
+;; return value:
+#object[java.io.File 0x2a869a16 "/Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1"]
 ```
 
 To create a path with the package (this implicitly resolves the package like above):

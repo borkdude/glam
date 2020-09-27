@@ -79,20 +79,21 @@
 
 (defn install-package [package force? verbose?]
   (when-let [package (find-package-descriptor package)]
-    (let [artifacts (match-artifacts package)]
+    (let [artifacts (match-artifacts package)
+          dest-dir (destination-dir package)]
       (mapv (fn [artifact]
-              (let [dest-dir (destination-dir package)
-                    url (:artifact/url artifact)
+              (let [url (:artifact/url artifact)
                     file-name (last (str/split url #"/"))
                     dest-file (io/file dest-dir file-name)]
                 (when (or force? (not (.exists dest-file)))
                   (download url dest-file verbose?)
                   (unzip dest-file dest-dir verbose?))
-                (.getPath dest-dir))) artifacts))))
+                (.getPath dest-dir))) artifacts)
+      dest-dir)))
 
 (def path-sep (System/getProperty "path.separator"))
 
 (defn path-with-pkgs [packages force? verbose?]
   (let [packages (keep find-package-descriptor packages)
-        paths (doall (mapcat #(install-package % force? verbose?) packages))]
+        paths (mapv #(install-package % force? verbose?) packages)]
     (str/join path-sep paths)))
