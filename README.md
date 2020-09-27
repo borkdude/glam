@@ -80,7 +80,6 @@ $ which clj-kondo
 
 ## TODO
 
-- [ ] Make everything work with GraalVM for fast startup
 - [ ] Support .tar.gz artifacts (currently only .zip)
 
 ## License
