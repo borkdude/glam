@@ -1,7 +1,7 @@
 # CPM
 
 CPM offers a flexible way to bring binaries into scope for a shell,
-piggybacking on the [Clojure Tools](tools deps).
+piggybacking on [tools deps](https://clojure.org/guides/deps_and_cli).
 
 Work in progress, not ready for production, breaking changes will happen.
 
