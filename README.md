@@ -1,14 +1,15 @@
 # CPM
 
-A package manager layered on top of the Clojure Tools.
+CPM offers a flexible way to bring binaries into scope for a shell,
+piggybacking on the [Clojure Tools](tools deps).
 
 Work in progress, not ready for production, breaking changes will happen.
 
 ## Usage
 
-Place <package>.cpm.edn in your Clojure dependency.
+Place `<package-name>.cpm.edn` in your Clojure dependency.
 
-E.g. from `test-resources`, `babashka.cpm.edn`:
+E.g. in the CPM repo's `test-resources` directory, there is `babashka.cpm.edn`:
 
 ``` clojure
 {:package/name org.babashka/babashka
@@ -21,9 +22,9 @@ E.g. from `test-resources`, `babashka.cpm.edn`:
    :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-macos-amd64.zip"}]}
 ```
 
-We need to use `-A:test` to bring this package into scope.
+We need to use `-A:test` to bring this package into scope (on the classpath).
 
-To resolve that package, invoke:
+To resolve the package, invoke:
 
 ``` clojure
 $ clojure -A:test -X cpm.api/resolve-pkg :package babashka :force true :verbose true
@@ -31,7 +32,7 @@ Downloading https://github.com/borkdude/babashka/releases/download/v0.2.1/babash
 Unzipping /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/babashka-0.2.1-macos-amd64.zip to /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1
 ```
 
-To create a path with the resolved binary (this implicitly does the above):
+To create a path with the package (this implicitly resolves the package like above):
 
 ``` clojure
 $ clojure -A:test -M -m cpm.main babashka
