@@ -68,7 +68,7 @@ $ bb '(+ 1 2 3)'
 6
 ```
 
-CPM can also run with babashka for fast startup (requires version from master, check CircleCI artifacts):
+CPM can also run with [babashka](https://github.com/borkdude/babashka) for fast startup (requires version from master, check CircleCI artifacts):
 
 ``` clojure
 $ bb -cp src:test-resources -m cpm.main --packages clj-kondo
