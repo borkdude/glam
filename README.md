@@ -52,14 +52,14 @@ user=> (api/resolve-pkg {:package "babashka" :verbose true})
 To create a path with packages (this implicitly resolves the packages like above):
 
 ``` clojure
-$ clojure -M:test -m cpm.main babashka --packages clj-kondo
+$ clojure -M:test -m cpm.main --packages clj-kondo babashka
 /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1:/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
 ```
 
 The resulting path can then be used to add programs on the path for the current shell:
 
 ``` clojure
-$ export PATH=$(clojure -M:test -m cpm.main babashka --packages clj-kondo):$PATH
+$ export PATH=$(clojure -M:test -m cpm.main --packages clj-kondo babashka):$PATH
 $ which bb
 /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/bb
 $ which clj-kondo
