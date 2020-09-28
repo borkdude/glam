@@ -83,10 +83,6 @@ $ which clj-kondo
 /Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09/clj-kondo
 ```
 
-## TODO
-
-- [ ] Support .tar.gz artifacts (currently only .zip)
-
 ## License
 
 Copyright © 2019-2020 Michiel Borkent
