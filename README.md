@@ -64,7 +64,18 @@ $ which clj-kondo
 /Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09/clj-kondo
 ```
 
-To install packages globally, use `--global`. This writes a path of globally installed packages to `$HOME/.cpm/path`. Add this path to `$PATH` in your favorite `.bashrc` analog:
+### Global
+
+To install packages globally, use `--global`. This writes a path of globally installed packages to `$HOME/.cpm/path`:
+
+``` clojure
+$ bb -cp src:test-resources -m cpm.main --install clj-kondo/clj-kondo --global --verbose
+Package clj-kondo/clj-kondo already installed
+Wrote /Users/borkdude/.cpm/path
+/Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09
+```
+
+Add this path to `$PATH` in your favorite `.bashrc` analog:
 
 ``` clojure
 # cpm
