@@ -12,18 +12,16 @@ Package PRs welcome.
 
 Place `<package-org>/<package-name>.glam.edn` in your Clojure dependency.
 
-Use this library using `clojure` with `deps.edn`:
+Use this library using `clojure` by using this alias in deps.edn:
 
 ``` clojure
-{:aliases
- {:glam/packages {:extra-deps
-                  {borkdude/glam {:git/url "https://github.com/borkdude/glam"
-                                  :sha "4599fb019deae9418d76a9996ae19b4003f3cc96"}
-                   ;; your-org/your-packages {,,,}
-                   }
-                  ;; :extra-paths ["your-packages"]
-                  }
-  :glam {:main-opts ["-m" "glam.main"]}}}
+:glam {:extra-deps
+       {borkdude/glam {:git/url "https://github.com/borkdude/glam"
+                       :sha "4599fb019deae9418d76a9996ae19b4003f3cc96"}
+        ;; your-org/your-packages {,,,}
+        }
+       ;; :extra-paths ["your-packages"]
+       :main-opts ["-m" "glam.main"]}
 ```
 
 Use any later SHA at your convenience or simply clone this project and use
@@ -33,7 +31,7 @@ Create an alias to reduce verbosity and store it in your favorite
 `.bashrc` analog:
 
 ``` clojure
-alias glam='clojure -M:glam/packages:glam'
+alias glam='clojure -M:glam'
 ```
 
 E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.glam.edn`:
@@ -94,7 +92,7 @@ Add this path to `$PATH` in your favorite `.bashrc` analog:
 
 ``` clojure
 # glam
-alias glam='clojure -M:glam/packages:glam'
+alias glam='clojure -M:glam'
 alias glam_path='export PATH="`cat $HOME/.glam/path 2>/dev/null`:$PATH"'
 glam_path
 ```
@@ -118,15 +116,17 @@ Update the current shell's path:
 $ glam_path
 ```
 
-Now we can run glam using babashka:
+Now we can run glam using babashka.
 
 ``` clojure
-$ bb -cp $(clojure -A:glam/packages -Spath) -m glam.main --install clj-kondo/clj-kondo --global --verbose
-
+$ bb -cp $(clojure -Spath -A:glam) -m glam.main --install clj-kondo/clj-kondo --global --verbose
 ...
 Wrote /Users/borkdude/.glam/path
 /Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
 ```
+
+Ignore the `:main-opts` warning from `clojure`, it will be gone in the
+future. Mean while you can append `2>/dev/null` to swallow the warning.
 
 To use `bb` instead of `clojure` to invoke `glam`:
 
@@ -134,13 +134,14 @@ To use `bb` instead of `clojure` to invoke `glam`:
 # glam
 alias glam_path='export PATH="`cat $HOME/.glam/path 2>/dev/null`:$PATH"'
 glam_path
-alias glam='bb -cp $(clojure -A:glam/packages -Spath) -m glam.main'
+alias glam='bb -cp $(clojure -Spath -A:glam) -m glam.main'
 ```
 
-Or, to bundle everything into one asset, use babashka's `--uberjar` option:
+Or, to bundle everything into one asset e.g. for moving to another machine, use
+babashka's `--uberjar` option:
 
 ``` clojure
-$ bb -cp $(clojure -A:glam/packages -Spath) -m glam.main --uberjar glam.jar
+$ bb -cp $(clojure -Spath -A:glam) -m glam.main --uberjar glam.jar
 ```
 
 This uberjar contains all packages from the classpath and the package manager
