@@ -63,8 +63,6 @@ $ glam --install clj-kondo/clj-kondo org.babashka/babashka
 /Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09:/Users/borkdude/.glam/repository/org.babashka/babashka/0.2.1
 ```
 
-Use `--verbose` for more output, `--force` for re-downloading packages.
-
 The resulting path can then be used to add programs on the path for the current shell:
 
 ``` clojure
@@ -76,6 +74,8 @@ $ which clj-kondo
 $ bb '(+ 1 2 3)'
 6
 ```
+
+Use `--verbose` for more output, `--force` for re-downloading packages.
 
 ### Global
 
