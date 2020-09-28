@@ -34,7 +34,7 @@ To create a path with packages:
 
 ``` clojure
 $ clojure -M -m cpm.main --install clj-kondo/clj-kondo org.babashka/babashka
-/Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1:/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
+/Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09:/Users/borkdude/.cpm/repository/org.babashka/babashka/0.2.1
 ```
 
 Use `--verbose` for more output, `--force` for re-downloading packages.
@@ -44,7 +44,7 @@ The resulting path can then be used to add programs on the path for the current 
 ``` clojure
 $ export PATH=$(clojure -M -m cpm.main --install clj-kondo/clj-kondo org.babashka/babashka):$PATH
 $ which bb
-/Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1/bb
+/Users/borkdude/.cpm/repository/org.babashka/babashka/0.2.1/bb
 $ which clj-kondo
 /Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09/clj-kondo
 $ bb '(+ 1 2 3)'
@@ -75,10 +75,7 @@ CPM can also run with [babashka](https://github.com/borkdude/babashka) for fast 
 
 ``` clojure
 $ clojure -M -m cpm.main --install org.babashka/babashka@0.2.2-SNAPSHOT --global --verbose
-Downloading https://12062-201467090-gh.circle-artifacts.com/0/release/babashka-0.2.2-SNAPSHOT-macos-amd64.zip to /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT/babashka-0.2.2-SNAPSHOT-macos-amd64.zip
-Download complete.
-Unzipping /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT/babashka-0.2.2-SNAPSHOT-macos-amd64.zip to /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT
-Making /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT/bb executable.
+...
 Wrote /Users/borkdude/.cpm/path
 /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09
 ```
@@ -91,7 +88,7 @@ $ export PATH="`cat $HOME/.cpm/path 2>/dev/null`:$PATH"
 
 ``` clojure
 $ bb -cp src:packages -m cpm.main --install clj-kondo/clj-kondo --global --verbose
-Package clj-kondo/clj-kondo already installed
+...
 Wrote /Users/borkdude/.cpm/path
 /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09
 ```
