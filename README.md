@@ -127,7 +127,7 @@ Wrote /Users/borkdude/.glam/path
 ```
 
 Ignore the `:main-opts` warning from `clojure`, it will be gone in the
-future. Mean while you can append `2>/dev/null` to swallow the warning.
+future. Meanwhile you can append `2>/dev/null` to swallow the warning.
 
 To use `bb` instead of `clojure` to invoke `glam`:
 
