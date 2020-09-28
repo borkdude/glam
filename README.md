@@ -6,6 +6,8 @@ Glam offers a flexible way to bring binaries into scope globally or for just one
 
 Work in progress, not ready for production, breaking changes will happen.
 
+Package PRs welcome.
+
 ## Usage
 
 Place `<package-org>/<package-name>.glam.edn` in your Clojure dependency.
@@ -24,8 +26,11 @@ Use this library using `clojure` with `deps.edn`:
   :glam {:main-opts ["-m" "glam.main"]}}}
 ```
 
-Use any later SHA at your convenience. Create an alias to reduce verbosity and
-store it in your favorite `.bashrc` analog:
+Use any later SHA at your convenience or simply clone this project and use
+`:local/root`.
+
+Create an alias to reduce verbosity and store it in your favorite
+`.bashrc` analog:
 
 ``` clojure
 alias glam='clojure -M:glam/packages:glam'
