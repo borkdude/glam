@@ -29,7 +29,7 @@ Create an alias to reduce verbosity and store it in your favorite
 `.bashrc` analog:
 
 ``` bash
-#glam
+# glam
 alias glam='clojure -M:glam'
 ```
 
