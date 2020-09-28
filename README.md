@@ -106,6 +106,9 @@ itself. You can then run it from anywhere on your system:
 $ mv cpm.jar /tmp
 $ cd /tmp
 $ bb -jar cpm.jar --install clj-kondo/clj-kondo --global --verbose
+...
+Wrote /Users/borkdude/.cpm/path
+/Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09
 ```
 
 ## License
