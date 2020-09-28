@@ -76,12 +76,16 @@
 
 (defn find-package-descriptor [package]
   (if (not (map? package))
-    (let [package (str/replace (str package) "/" ".")
+    (let [;; package (str/replace (str package) "/" ".")
           resource (str package ".cpm.edn")]
-      (when-let [f (io/resource resource)]
+      (if-let [f (io/resource resource)]
         (let [pkg (edn/read-string (slurp f))]
-          pkg)))
+          pkg)
+        (warn "Package" package "not found")))
     package))
+
+(defn pkg-name [package]
+  (:package/name package))
 
 (defn install-package [package force? verbose?]
   (when-let [package (find-package-descriptor package)]
@@ -91,11 +95,13 @@
               (let [url (:artifact/url artifact)
                     file-name (last (str/split url #"/"))
                     dest-file (io/file dest-dir file-name)]
-                (when (or force? (not (.exists dest-file)))
-                  (download url dest-file verbose?)
-                  (unzip dest-file dest-dir
-                         (:artifact/executables artifact)
-                         verbose?))
+                (if (and (not force?) (.exists dest-file))
+                  (when verbose?
+                    (warn "Package" (pkg-name package) "already installed"))
+                  (do (download url dest-file verbose?)
+                      (unzip dest-file dest-dir
+                             (:artifact/executables artifact)
+                             verbose?)))
                 (.getPath dest-dir))) artifacts)
       dest-dir)))
 
