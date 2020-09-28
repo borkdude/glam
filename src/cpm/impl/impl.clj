@@ -70,8 +70,7 @@
   (io/file (System/getProperty "user.home")
            ".cpm"
            "packages"
-           (str/replace package-name
-                        #"\." "/")
+           (str package-name)
            package-version))
 
 (defn find-package-descriptor [package]
