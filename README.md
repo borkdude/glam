@@ -28,7 +28,7 @@ Use any later SHA at your convenience or simply clone this project and use
 Create an alias to reduce verbosity and store it in your favorite
 `.bashrc` analog:
 
-``` clojure
+``` bash
 #glam
 alias glam='clojure -M:glam'
 ```
@@ -91,7 +91,7 @@ Wrote /Users/borkdude/.glam/path
 
 Add this path to `$PATH` in your favorite `.bashrc` analog:
 
-``` clojure
+``` bash
 # glam
 alias glam='clojure -M:glam'
 alias glam_path='export PATH="`cat $HOME/.glam/path 2>/dev/null`:$PATH"'
@@ -131,7 +131,7 @@ future. Mean while you can append `2>/dev/null` to swallow the warning.
 
 To use `bb` instead of `clojure` to invoke `glam`:
 
-``` clojure
+``` bash
 # glam
 alias glam_path='export PATH="`cat $HOME/.glam/path 2>/dev/null`:$PATH"'
 glam_path
