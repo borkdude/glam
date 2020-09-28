@@ -23,6 +23,7 @@
 
 (defn -main [& args]
   (let [parsed (parse-args args)]
-    (println (impl/path-with-pkgs (get parsed "--packages")
+    (println (impl/path-with-pkgs (get parsed "--install")
                                   (boolean (get parsed "--force"))
-                                  (boolean (get parsed "--verbose"))))))
+                                  (boolean (get parsed "--verbose"))
+                                  (boolean (get parsed "--global"))))))

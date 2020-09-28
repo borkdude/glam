@@ -69,7 +69,7 @@
     package-version :package/version}]
   (io/file (System/getProperty "user.home")
            ".cpm"
-           "packages"
+           "repository"
            (str package-name)
            package-version))
 
@@ -86,7 +86,22 @@
 (defn pkg-name [package]
   (:package/name package))
 
-(defn install-package [package force? verbose?]
+(def ^java.io.File cpm-dir
+  (io/file (System/getProperty "user.home")
+           ".cpm"))
+
+(def ^java.io.File global-install-file
+  (io/file cpm-dir
+           "installed.edn"))
+
+(defn add-package-to-global [package]
+  (when-not (.exists global-install-file)
+    (spit global-install-file ""))
+  (let [installed (edn/read-string (slurp global-install-file))
+        installed (assoc installed (:package/name package) (:package/version package))]
+    (spit global-install-file installed)))
+
+(defn install-package [package force? verbose? global?]
   (when-let [package (find-package-descriptor package)]
     (let [artifacts (match-artifacts package)
           dest-dir (destination-dir package)]
@@ -100,13 +115,33 @@
                   (do (download url dest-file verbose?)
                       (unzip dest-file dest-dir
                              (:artifact/executables artifact)
-                             verbose?)))
+                             verbose?)
+                      (when global?
+                        (add-package-to-global package))))
                 (.getPath dest-dir))) artifacts)
       dest-dir)))
 
 (def path-sep (System/getProperty "path.separator"))
 
-(defn path-with-pkgs [packages force? verbose?]
-  (let [packages (keep find-package-descriptor packages)
-        paths (mapv #(install-package % force? verbose?) packages)]
+(defn global-path []
+  (let [installed (edn/read-string (slurp global-install-file))
+        paths (reduce (fn [acc [k v]]
+                        (conj acc (.getPath (io/file cpm-dir
+                                                     "repository"
+                                                     (str k)
+                                                     (str v)))))
+                      []
+                      installed)]
     (str/join path-sep paths)))
+
+(defn path-with-pkgs [packages force? verbose? global?]
+  (let [packages (keep find-package-descriptor packages)
+        paths (mapv #(install-package % force? verbose? global?) packages)]
+    (if global?
+      (let [gp (global-path)
+            gpf (io/file cpm-dir "path")]
+        (spit gpf gp)
+        (when verbose?
+          (warn "Wrote" (.getPath gpf)))
+        gp)
+      (str/join path-sep paths))))

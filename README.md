@@ -1,16 +1,17 @@
 # CPM
 
-CPM offers a flexible way to bring binaries into scope for a shell,
-piggybacking on [tools deps](https://clojure.org/guides/deps_and_cli).
+CPM offers a flexible way to bring binaries into scope for a shell, piggybacking
+on [tools deps](https://clojure.org/guides/deps_and_cli) (this may change to a
+standalone solution in the future, based on a GraalVM binary).
 
 Work in progress, not sure where this is going, not ready for production,
 breaking changes will happen.
 
 ## Usage
 
-Place `<package-name>.cpm.edn` in your Clojure dependency.
+Place `<package-org>/<package-name>.cpm.edn` in your Clojure dependency.
 
-E.g. in the CPM repo's `test-resources` directory, there is `org.babashka.babashka.cpm.edn`:
+E.g. in the CPM repo's `test-resources` directory, there is `org.babashka/babashka.cpm.edn`:
 
 ``` clojure
 {:package/name org.babashka/babashka
@@ -32,10 +33,10 @@ E.g. in the CPM repo's `test-resources` directory, there is `org.babashka.babash
    :artifact/executables ["bb.exe"]}]}
 ```
 
-To create a path with packages (this automatically pulls the package):
+To create a path with packages:
 
 ``` clojure
-$ clojure -M:test -m cpm.main --packages clj-kondo/clj-kondo org.babashka/babashka
+$ clojure -M:test -m cpm.main --install clj-kondo/clj-kondo org.babashka/babashka
 /Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1:/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
 ```
 
@@ -44,7 +45,7 @@ Use `--verbose` for more output, `--force` for re-downloading packages.
 The resulting path can then be used to add programs on the path for the current shell:
 
 ``` clojure
-$ export PATH=$(clojure -M:test -m cpm.main --packages clj-kondo/clj-kondo org.babashka/babashka):$PATH
+$ export PATH=$(clojure -M:test -m cpm.main --install clj-kondo/clj-kondo org.babashka/babashka):$PATH
 $ which bb
 /Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1/bb
 $ which clj-kondo
@@ -56,11 +57,18 @@ $ bb '(+ 1 2 3)'
 CPM can also run with [babashka](https://github.com/borkdude/babashka) for fast startup (requires version from master, check CircleCI artifacts):
 
 ``` clojure
-$ bb -cp src:test-resources -m cpm.main --packages clj-kondo/clj-kondo
+$ bb -cp src:test-resources -m cpm.main --install clj-kondo/clj-kondo
 /Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
 export PATH=$(bb -cp src:test-resources -m cpm.main clj-kondo):$PATH
 $ which clj-kondo
 /Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09/clj-kondo
+```
+
+To install packages globally, use `--global`. This writes a path of globally installed packages to `$HOME/.cpm/path`. Add this path to `$PATH` in your favorite `.bashrc` analog:
+
+``` clojure
+# cpm
+export PATH="`cat $HOME/.cpm/path 2>/dev/null`:$PATH"
 ```
 
 ## License
