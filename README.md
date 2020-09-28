@@ -32,12 +32,14 @@ E.g. in the CPM repo's `test-resources` directory, there is `org.babashka.babash
    :artifact/executables ["bb.exe"]}]}
 ```
 
-To create a path with packages:
+To create a path with packages (this automatically pulls the package):
 
 ``` clojure
 $ clojure -M:test -m cpm.main --packages clj-kondo/clj-kondo org.babashka/babashka
 /Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1:/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
 ```
+
+Use `--verbose` for more output, `--force` for re-downloading packages.
 
 The resulting path can then be used to add programs on the path for the current shell:
 
