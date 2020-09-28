@@ -10,7 +10,7 @@ Work in progress, not ready for production, breaking changes will happen.
 
 Place `<package-org>/<package-name>.glam.edn` in your Clojure dependency.
 
-Use this library using `clojure` in `deps.edn`:
+Use this library using `clojure` with `deps.edn`:
 
 ``` clojure
 {:aliases
@@ -53,7 +53,7 @@ E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.gl
    :artifact/executables ["bb.exe"]}]}
 ```
 
-To create a path with packages:
+To install packages and get a path in return:
 
 ``` clojure
 $ glam --install clj-kondo/clj-kondo org.babashka/babashka
