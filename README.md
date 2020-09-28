@@ -66,8 +66,11 @@ Add this path to `$PATH` in your favorite `.bashrc` analog:
 
 ``` clojure
 # cpm
-export PATH="`cat $HOME/.cpm/path 2>/dev/null`:$PATH"
+alias cpm_path='export PATH="`cat $HOME/.cpm/path 2>/dev/null`:$PATH"'
+cpm_path
 ```
+
+Run `cpm_path` again after installing to update the path for the current shell.
 
 ### Babashka
 
@@ -80,10 +83,10 @@ Wrote /Users/borkdude/.cpm/path
 /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09
 ```
 
-Reload your shell if you have added the global path snippet from above or add the new global path manually:
+Update the current shell's path:
 
 ``` clojure
-$ export PATH="`cat $HOME/.cpm/path 2>/dev/null`:$PATH"
+$ cpm_path
 ```
 
 ``` clojure
