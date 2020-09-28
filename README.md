@@ -89,6 +89,8 @@ Update the current shell's path:
 $ cpm_path
 ```
 
+Now we can run CPM using babashka:
+
 ``` clojure
 $ bb -cp src:packages -m cpm.main --install clj-kondo/clj-kondo --global --verbose
 ...
