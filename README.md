@@ -32,33 +32,11 @@ E.g. in the CPM repo's `test-resources` directory, there is `org.babashka.babash
    :artifact/executables ["bb.exe"]}]}
 ```
 
-We need to use `-A:test` to bring this package into scope (on the classpath).
-
-To resolve a package, invoke:
-
-``` clojure
-$ clj -A:test
-Clojure 1.10.1
-user=> (require '[cpm.api :as api])
-nil
-user=> (api/resolve-pkg {:package 'org.babashka/babashka :force true :verbose true})
-;; output to stderr:
-Downloading https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-macos-amd64.zip to /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/babashka-0.2.1-macos-amd64.zip
-Unzipping /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/babashka-0.2.1-macos-amd64.zip to /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1
-Making /Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/bb executable.
-;; return value:
-#object[java.io.File 0x29a98d9f "/Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1"]
-
-user=> (api/resolve-pkg {:package 'org.babashka/babashka :verbose true})
-;; return value:
-#object[java.io.File 0x2a869a16 "/Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1"]
-```
-
-To create a path with packages (this implicitly resolves the packages like above):
+To create a path with packages:
 
 ``` clojure
 $ clojure -M:test -m cpm.main --packages clj-kondo/clj-kondo org.babashka/babashka
-/Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1:/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
+/Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1:/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
 ```
 
 The resulting path can then be used to add programs on the path for the current shell:
@@ -66,7 +44,7 @@ The resulting path can then be used to add programs on the path for the current 
 ``` clojure
 $ export PATH=$(clojure -M:test -m cpm.main --packages clj-kondo/clj-kondo org.babashka/babashka):$PATH
 $ which bb
-/Users/borkdude/.cpm/packages/org/babashka/babashka/0.2.1/bb
+/Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1/bb
 $ which clj-kondo
 /Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09/clj-kondo
 $ bb '(+ 1 2 3)'
