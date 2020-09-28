@@ -2,14 +2,13 @@
 
 CPM offers a flexible way to bring binaries into scope globally or for just one shell.
 
-Work in progress, not sure where this is going, not ready for production,
-breaking changes will happen.
+Work in progress, not ready for production, breaking changes will happen.
 
 ## Usage
 
 Place `<package-org>/<package-name>.cpm.edn` in your Clojure dependency.
 
-E.g. in the CPM repo's `test-resources` directory, there is `org.babashka/babashka.cpm.edn`:
+E.g. in the CPM repo's `packages` directory, there is `org.babashka/babashka.cpm.edn`:
 
 ``` clojure
 {:package/name org.babashka/babashka
@@ -34,7 +33,7 @@ E.g. in the CPM repo's `test-resources` directory, there is `org.babashka/babash
 To create a path with packages:
 
 ``` clojure
-$ clojure -M:test -m cpm.main --install clj-kondo/clj-kondo org.babashka/babashka
+$ clojure -M -m cpm.main --install clj-kondo/clj-kondo org.babashka/babashka
 /Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1:/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09
 ```
 
@@ -43,7 +42,7 @@ Use `--verbose` for more output, `--force` for re-downloading packages.
 The resulting path can then be used to add programs on the path for the current shell:
 
 ``` clojure
-$ export PATH=$(clojure -M:test -m cpm.main --install clj-kondo/clj-kondo org.babashka/babashka):$PATH
+$ export PATH=$(clojure -M -m cpm.main --install clj-kondo/clj-kondo org.babashka/babashka):$PATH
 $ which bb
 /Users/borkdude/.cpm/packages/org.babashka/babashka/0.2.1/bb
 $ which clj-kondo
@@ -57,7 +56,7 @@ $ bb '(+ 1 2 3)'
 To install packages globally, use `--global`. This writes a path of globally installed packages to `$HOME/.cpm/path`:
 
 ``` clojure
-$ clojure -M:test -m cpm.main --install clj-kondo/clj-kondo --global --verbose
+$ clojure -M -m cpm.main --install clj-kondo/clj-kondo --global --verbose
 Package clj-kondo/clj-kondo already installed
 Wrote /Users/borkdude/.cpm/path
 /Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09
@@ -75,7 +74,7 @@ export PATH="`cat $HOME/.cpm/path 2>/dev/null`:$PATH"
 CPM can also run with [babashka](https://github.com/borkdude/babashka) for fast startup. Currently you will need the latest SNAPSHOT version. First install it using `clojure`:
 
 ``` clojure
-$ clojure -M:test -m cpm.main --install org.babashka/babashka@SNAPSHOT --global --verbose
+$ clojure -M -m cpm.main --install org.babashka/babashka@SNAPSHOT --global --verbose
 Downloading https://12062-201467090-gh.circle-artifacts.com/0/release/babashka-0.2.2-SNAPSHOT-macos-amd64.zip to /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT/babashka-0.2.2-SNAPSHOT-macos-amd64.zip
 Download complete.
 Unzipping /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT/babashka-0.2.2-SNAPSHOT-macos-amd64.zip to /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT
@@ -91,7 +90,7 @@ $ export PATH="`cat $HOME/.cpm/path 2>/dev/null`:$PATH"
 ```
 
 ``` clojure
-$ bb -cp src:test-resources -m cpm.main --install clj-kondo/clj-kondo --global --verbose
+$ bb -cp src:packages -m cpm.main --install clj-kondo/clj-kondo --global --verbose
 Package clj-kondo/clj-kondo already installed
 Wrote /Users/borkdude/.cpm/path
 /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09
