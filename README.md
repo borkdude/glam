@@ -132,7 +132,7 @@ glam_path
 alias glam='bb -cp $(clojure -A:glam/packages -Spath) -m glam.main'
 ```
 
-To package things up nicely, use babashka's `--uberjar` option:
+Or, to bundle everything into one asset, use babashka's `--uberjar` option:
 
 ``` clojure
 $ bb -cp $(clojure -A:glam/packages -Spath) -m glam.main --uberjar glam.jar
