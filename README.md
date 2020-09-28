@@ -71,10 +71,10 @@ export PATH="`cat $HOME/.cpm/path 2>/dev/null`:$PATH"
 
 ### Babashka
 
-CPM can also run with [babashka](https://github.com/borkdude/babashka) for fast startup. Currently you will need the latest SNAPSHOT version. First install it using `clojure`:
+CPM can also run with [babashka](https://github.com/borkdude/babashka) for fast startup. Currently you will need the latest `0.2.2-SNAPSHOT` version. First install it using `clojure`:
 
 ``` clojure
-$ clojure -M -m cpm.main --install org.babashka/babashka@SNAPSHOT --global --verbose
+$ clojure -M -m cpm.main --install org.babashka/babashka@0.2.2-SNAPSHOT --global --verbose
 Downloading https://12062-201467090-gh.circle-artifacts.com/0/release/babashka-0.2.2-SNAPSHOT-macos-amd64.zip to /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT/babashka-0.2.2-SNAPSHOT-macos-amd64.zip
 Download complete.
 Unzipping /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT/babashka-0.2.2-SNAPSHOT-macos-amd64.zip to /Users/borkdude/.cpm/repository/org.babashka/babashka/SNAPSHOT
