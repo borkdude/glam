@@ -46,7 +46,7 @@ $ export PATH=$(clojure -M -m cpm.main --install clj-kondo/clj-kondo org.babashk
 $ which bb
 /Users/borkdude/.cpm/repository/org.babashka/babashka/0.2.1/bb
 $ which clj-kondo
-/Users/borkdude/.cpm/packages/clj-kondo/clj-kondo/2020.09.09/clj-kondo
+/Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09/clj-kondo
 $ bb '(+ 1 2 3)'
 6
 ```
