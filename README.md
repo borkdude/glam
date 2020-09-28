@@ -10,9 +10,7 @@ Package PRs welcome.
 
 ## Usage
 
-Place `<package-org>/<package-name>.glam.edn` in your Clojure dependency.
-
-Use this library using `clojure` by using this alias in deps.edn:
+Install glam by using this alias in `deps.edn`:
 
 ``` clojure
 :glam {:extra-deps
@@ -33,6 +31,8 @@ Create an alias to reduce verbosity and store it in your favorite
 ``` clojure
 alias glam='clojure -M:glam'
 ```
+
+Package files like `<package-org>/<package-name>.glam.edn` are discovered via the classpath.
 
 E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.glam.edn`:
 
