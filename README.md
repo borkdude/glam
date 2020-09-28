@@ -10,6 +10,27 @@ Work in progress, not ready for production, breaking changes will happen.
 
 Place `<package-org>/<package-name>.glam.edn` in your Clojure dependency.
 
+Use this library using `clojure` in `deps.edn`:
+
+``` clojure
+{:aliases
+ {:glam/packages {:extra-deps
+                  {borkdude/glam {:git/url "https://github.com/borkdude/glam"
+                                  :sha "4599fb019deae9418d76a9996ae19b4003f3cc96"}
+                   ;; your-org/your-packages {,,,}
+                   }
+                  ;; :extra-paths ["your-packages"]
+                  }
+  :glam {:main-opts ["-m" "glam.main"]}}}
+```
+
+Use any later SHA at your convenience. Create an alias to reduce verbosity and
+store it in your favorite `.bashrc` analog:
+
+``` clojure
+alias glam='clojure -M:glam/packages:glam'
+```
+
 E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.glam.edn`:
 
 ``` clojure
@@ -35,7 +56,7 @@ E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.gl
 To create a path with packages:
 
 ``` clojure
-$ clojure -M -m glam.main --install clj-kondo/clj-kondo org.babashka/babashka
+$ glam --install clj-kondo/clj-kondo org.babashka/babashka
 /Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09:/Users/borkdude/.glam/repository/org.babashka/babashka/0.2.1
 ```
 
@@ -44,7 +65,7 @@ Use `--verbose` for more output, `--force` for re-downloading packages.
 The resulting path can then be used to add programs on the path for the current shell:
 
 ``` clojure
-$ export PATH=$(clojure -M -m glam.main --install clj-kondo/clj-kondo org.babashka/babashka):$PATH
+$ export PATH=$(glam --install clj-kondo/clj-kondo org.babashka/babashka):$PATH
 $ which bb
 /Users/borkdude/.glam/repository/org.babashka/babashka/0.2.1/bb
 $ which clj-kondo
@@ -58,7 +79,7 @@ $ bb '(+ 1 2 3)'
 To install packages globally, use `--global`. This writes a path of globally installed packages to `$HOME/.glam/path`:
 
 ``` clojure
-$ clojure -M -m glam.main --install clj-kondo/clj-kondo --global --verbose
+$ glam --install clj-kondo/clj-kondo --global --verbose
 ...
 Wrote /Users/borkdude/.glam/path
 /Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
@@ -79,7 +100,7 @@ Run `glam_path` again after installing to update the path for the current shell.
 Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast startup. Currently you will need the latest `0.2.2-SNAPSHOT` version. First install it using `clojure`:
 
 ``` clojure
-$ clojure -M -m glam.main --install org.babashka/babashka@0.2.2-SNAPSHOT --global --verbose
+$ glam --install org.babashka/babashka@0.2.2-SNAPSHOT --global --verbose
 ...
 Wrote /Users/borkdude/.glam/path
 /Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
@@ -94,7 +115,8 @@ $ glam_path
 Now we can run glam using babashka:
 
 ``` clojure
-$ bb -cp src:packages -m glam.main --install clj-kondo/clj-kondo --global --verbose
+$ bb -cp $(clojure -A:glam/packages -Spath) -m glam.main --install clj-kondo/clj-kondo --global --verbose
+
 ...
 Wrote /Users/borkdude/.glam/path
 /Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
@@ -103,7 +125,7 @@ Wrote /Users/borkdude/.glam/path
 To package things up nicely, use babashka's `--uberjar` option:
 
 ``` clojure
-$ bb -cp src:packages -m glam.main --uberjar glam.jar
+$ bb -cp $(clojure -A:glam/packages -Spath) -m glam.main --uberjar glam.jar
 ```
 
 This uberjar contains all packages from the classpath and the package manager
