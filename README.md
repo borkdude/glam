@@ -1,8 +1,6 @@
 # CPM
 
-CPM offers a flexible way to bring binaries into scope for a shell, piggybacking
-on [tools deps](https://clojure.org/guides/deps_and_cli) (this may change to a
-standalone solution in the future, based on a GraalVM binary).
+CPM offers a flexible way to bring binaries into scope globally or for just one shell.
 
 Work in progress, not sure where this is going, not ready for production,
 breaking changes will happen.
