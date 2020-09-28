@@ -57,7 +57,7 @@ To install packages globally, use `--global`. This writes a path of globally ins
 
 ``` clojure
 $ clojure -M -m cpm.main --install clj-kondo/clj-kondo --global --verbose
-Package clj-kondo/clj-kondo already installed
+...
 Wrote /Users/borkdude/.cpm/path
 /Users/borkdude/.cpm/repository/clj-kondo/clj-kondo/2020.09.09
 ```
