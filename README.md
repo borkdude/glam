@@ -89,6 +89,7 @@ Add this path to `$PATH` in your favorite `.bashrc` analog:
 
 ``` clojure
 # glam
+alias glam='clojure -M:glam/packages:glam'
 alias glam_path='export PATH="`cat $HOME/.glam/path 2>/dev/null`:$PATH"'
 glam_path
 ```
@@ -120,6 +121,15 @@ $ bb -cp $(clojure -A:glam/packages -Spath) -m glam.main --install clj-kondo/clj
 ...
 Wrote /Users/borkdude/.glam/path
 /Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
+```
+
+To use `bb` instead of `clojure` to invoke `glam`:
+
+``` clojure
+# glam
+alias glam_path='export PATH="`cat $HOME/.glam/path 2>/dev/null`:$PATH"'
+glam_path
+alias glam='bb -cp $(clojure -A:glam/packages -Spath) -m glam.main'
 ```
 
 To package things up nicely, use babashka's `--uberjar` option:
