@@ -1,6 +1,6 @@
 # Glam
 
-A cross platform package manager for projects that rock.
+A cross-platform package manager for projects that rock.
 
 Glam offers a flexible way to bring binaries into scope globally or for just one shell.
 
