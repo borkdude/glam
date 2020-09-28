@@ -106,6 +106,8 @@ This uberjar contains all packages from the classpath and the package manager
 itself. You can then run it from anywhere on your system:
 
 ``` clojure
+$ cp cpm.jar /tmp
+$ cd /tmp
 $ bb -jar cpm.jar --install clj-kondo/clj-kondo --global --verbose
 ```
 
