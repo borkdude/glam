@@ -1,4 +1,4 @@
-(ns cpm.impl.impl
+(ns glam.impl.impl
   {:no-doc true}
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -68,7 +68,7 @@
   [{package-name :package/name
     package-version :package/version}]
   (io/file (System/getProperty "user.home")
-           ".cpm"
+           ".glam"
            "repository"
            (str package-name)
            package-version))
@@ -76,7 +76,7 @@
 (defn find-package-descriptor [package]
   (if (not (map? package))
     (let [;; package (str/replace (str package) "/" ".")
-          resource (str package ".cpm.edn")]
+          resource (str package ".glam.edn")]
       (if-let [f (io/resource resource)]
         (let [pkg (edn/read-string (slurp f))]
           pkg)
@@ -86,17 +86,20 @@
 (defn pkg-name [package]
   (:package/name package))
 
-(def ^java.io.File cpm-dir
+(def ^java.io.File glam-dir
   (io/file (System/getProperty "user.home")
-           ".cpm"))
+           ".glam"))
 
 (def ^java.io.File global-install-file
-  (io/file cpm-dir
+  (io/file glam-dir
            "installed.edn"))
 
-(defn add-package-to-global [package]
+(defn ensure-global-path-exists []
   (when-not (.exists global-install-file)
-    (spit global-install-file ""))
+    (spit global-install-file "")))
+
+(defn add-package-to-global [package]
+  (ensure-global-path-exists)
   (let [installed (edn/read-string (slurp global-install-file))
         installed (assoc installed (:package/name package) (:package/version package))]
     (spit global-install-file installed)))
@@ -124,9 +127,10 @@
 (def path-sep (System/getProperty "path.separator"))
 
 (defn global-path []
+  (ensure-global-path-exists)
   (let [installed (edn/read-string (slurp global-install-file))
         paths (reduce (fn [acc [k v]]
-                        (conj acc (.getPath (io/file cpm-dir
+                        (conj acc (.getPath (io/file glam-dir
                                                      "repository"
                                                      (str k)
                                                      (str v)))))
@@ -139,7 +143,7 @@
         paths (mapv #(install-package % force? verbose? global?) packages)]
     (if global?
       (let [gp (global-path)
-            gpf (io/file cpm-dir "path")]
+            gpf (io/file glam-dir "path")]
         (spit gpf gp)
         (when verbose?
           (warn "Wrote" (.getPath gpf)))

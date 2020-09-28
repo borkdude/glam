@@ -1,6 +1,6 @@
-(ns cpm.main
+(ns glam.main
   (:require [clojure.string :as str]
-            [cpm.impl.impl :as impl]))
+            [glam.impl.impl :as impl]))
 
 (defn split-when
   "Like partition-by but splits collection only when `pred` returns
