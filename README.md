@@ -98,6 +98,6 @@ Wrote /Users/borkdude/.cpm/path
 
 ## License
 
-Copyright © 2019-2020 Michiel Borkent
+Copyright © 2020 Michiel Borkent
 
 Distributed under the EPL License. See LICENSE.
