@@ -27,7 +27,7 @@ Use any later SHA at your convenience or simply clone this project and use
 
 Additionally, install a shell helper script by running this and following the instructions:
 
-``` clojure
+``` shell
 $ clojure -M:glam setup
 Include this in your .bashrc analog to finish setup:
 
