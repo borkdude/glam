@@ -149,3 +149,11 @@
           (warn "Wrote" (.getPath gpf)))
         gp)
       (str/join path-sep paths))))
+
+(defn setup []
+  (let [glam-sh-dest (io/file glam-dir "scripts" "glam.sh")]
+    (io/make-parents glam-sh-dest)
+    (spit glam-sh-dest (slurp (io/resource "borkdude/glam/scripts/glam.sh")))
+    (warn "Include this in your .bashrc analog to finish setup:")
+    (warn)
+    (warn "source" "$HOME/.glam/scripts/glam.sh")))

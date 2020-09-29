@@ -13,17 +13,35 @@
            run (cons fst (take-while #(f %) (next s)))]
        (cons run (split-when pred (lazy-seq (drop (count run) s))))))))
 
+(def boolean-flags
+  #{"--force" "--verbose" "--global" "-g"})
+
 (defn parse-args [args]
   (->> args
        (split-when #(str/starts-with? % "-"))
        (reduce (fn [acc [k & vs]]
-                 (assoc acc k (or vs
-                                  true)))
+                 (assoc acc k
+                        (or vs
+                            (when (contains? boolean-flags k)
+                              true))))
                {})))
 
+(def subcommand
+  {"install" "--install"
+   "setup" "--setup"})
+
 (defn -main [& args]
-  (let [parsed (parse-args args)]
-    (println (impl/path-with-pkgs (get parsed "--install")
-                                  (boolean (get parsed "--force"))
-                                  (boolean (get parsed "--verbose"))
-                                  (boolean (get parsed "--global"))))))
+  (when-let [subc* (first args)]
+    (let [subc (get subcommand subc* subc*)
+          args (cons subc (rest args))
+          parsed (parse-args args)]
+      (case subc
+        "--install"
+        (println (impl/path-with-pkgs (get parsed "--install")
+                                      (boolean (get parsed "--force"))
+                                      (boolean (get parsed "--verbose"))
+                                      (boolean (or (get parsed "--global")
+                                                   (get parsed "-g")))))
+        "--setup"
+        (impl/setup)
+        (impl/warn "Unknown command:" subc*)))))
