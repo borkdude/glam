@@ -34,7 +34,8 @@ Include this in your .bashrc analog to finish setup:
 source $HOME/.glam/scripts/glam.sh
 ```
 
-Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by `clojure -M:glam`.
+Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by
+`clojure -M:glam` and append the printed path to `%PATH%` yourself.
 
 ## Usage
 
