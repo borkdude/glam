@@ -8,8 +8,14 @@
 
 (set! *warn-on-reflection* true)
 
+(defn normalize-arch [arch]
+  (if (= "amd64" arch)
+    "x86_64"
+    arch))
+
 (def os {:os/name (System/getProperty "os.name")
-         :os/arch (System/getProperty "os.arch")})
+         :os/arch (let [arch (System/getProperty "os.arch")]
+                    (normalize-arch arch))})
 
 (defn warn [& strs]
   (binding [*out* *err*]
@@ -19,8 +25,10 @@
   (let [artifacts (:package/artifacts package)]
     (filter (fn [{os-name :os/name
                   os-arch :os/arch}]
-              (and (re-matches (re-pattern os-name) (:os/name os))
-                   (re-matches (re-pattern os-arch) (:os/arch os))))
+              (let [os-arch (normalize-arch os-arch)]
+                (and (re-matches (re-pattern os-name) (:os/name os))
+                     (re-matches (re-pattern os-arch)
+                                 (:os/arch os)))))
             artifacts)))
 
 (defn unzip [^java.io.File zip-file ^java.io.File destination-dir executables verbose?]
