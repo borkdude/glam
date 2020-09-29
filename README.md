@@ -10,6 +10,8 @@ Package PRs welcome.
 
 ## Install
 
+Glam uses the [Clojure CLI](https://clojure.org/guides/deps_and_cli).
+
 Install glam by using this alias in `deps.edn`:
 
 ``` clojure
