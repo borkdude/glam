@@ -38,7 +38,6 @@ Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by
 
 ## Usage
 
-```
 Package files like `<package-org>/<package-name>.glam.edn` are discovered via the classpath.
 
 E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.glam.edn`:
