@@ -1,0 +1,17 @@
+{:package/name epiccastle/spire
+ :package/description ""
+ :package/version "0.1.0-alpha.15"
+ :package/license ""
+ :package/artifacts
+ [{:os/name "Mac.*"
+   :os/arch "x86_64"
+   :artifact/url "https://github.com/epiccastle/spire/releases/download/v0.1.0-alpha.15/spire-0.1.0-alpha.15-macos-amd64.zip"
+   :artifact/executables ["spire"]}
+  {:os/name "Linux.*"
+   :os/arch "amd64"
+   :artifact/url "https://github.com/epiccastle/spire/releases/download/v0.1.0-alpha.15/spire-0.1.0-alpha.15-linux-amd64.tgz"
+   :artifact/executables ["spire"]}
+  #_{:os/name "Windows.*"
+   :os/arch "amd64"
+     :artifact/url ""
+     :artifact/executables ["bootleg.exe"]}]}
