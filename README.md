@@ -17,7 +17,7 @@ Install glam by using this alias in `deps.edn`:
 ``` clojure
 :glam {:extra-deps
        {borkdude/glam {:git/url "https://github.com/borkdude/glam"
-                       :sha "4599fb019deae9418d76a9996ae19b4003f3cc96"}
+                       :sha "92e1a8ec285bb983ad1c2fba28837606c5c99ab6"}
         ;; your-org/your-packages {,,,}
         }
        ;; :extra-paths ["your-packages"]
