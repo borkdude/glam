@@ -39,29 +39,12 @@ Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by
 
 ## Usage
 
-Package files like `<package-org>/<package-name>.glam.edn` are discovered via the classpath.
+Package files like `<package-org>/<package-name>.glam.edn` are discovered via
+the classpath. This means that in addition to glam's own packages you can add
+your own.
 
-E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.glam.edn`:
-
-``` clojure
-{:package/name org.babashka/babashka
- :package/description ""
- :package/version "0.2.1"
- :package/license ""
- :package/artifacts
- [{:os/name "Mac.*"
-   :os/arch "x86_64"
-   :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-macos-amd64.zip"
-   :artifact/executables ["bb"]}
-  {:os/name "Linux.*"
-   :os/arch "amd64"
-   :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-linux-amd64.zip"
-   :artifact/executables ["bb"]}
-  {:os/name "Windows.*"
-   :os/arch "amd64"
-   :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-windows-amd64.zip"
-   :artifact/executables ["bb.exe"]}]}
-```
+E.g. in the glam repo's `packages` directory, there is a
+`org.babashka/babashka.glam.edn`.
 
 To install packages for the current shell:
 
