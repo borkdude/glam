@@ -99,7 +99,7 @@ Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast
 $ glam org.babashka/babashka@0.2.2-SNAPSHOT -g
 ```
 
-Glam automatically detects if you have a compatible `bb` installed, so future
+Glam automatically detects if you have a compatible `bb` installed, so next
 `glam` invocations are invoked using `bb`:
 
 ``` clojure
