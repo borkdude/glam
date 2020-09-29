@@ -62,13 +62,13 @@ E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.gl
    :artifact/executables ["bb.exe"]}]}
 ```
 
-To install packages and get a path in return:
+To install packages for the current shell:
 
 ``` clojure
 $ glam install clj-kondo/clj-kondo org.babashka/babashka
 ```
 
-Now `clj-kondo` and `bb` are available in the current shell, but not globally:
+Now `clj-kondo` and `bb` are available:
 
 ``` clojure
 $ which bb
