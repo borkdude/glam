@@ -52,14 +52,14 @@ E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.gl
 To install packages and get a path in return:
 
 ``` clojure
-$ glam --install clj-kondo/clj-kondo org.babashka/babashka
+$ clojure -M:glam --install clj-kondo/clj-kondo org.babashka/babashka
 /Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09:/Users/borkdude/.glam/repository/org.babashka/babashka/0.2.1
 ```
 
 The resulting path can then be used to add programs on the path for the current shell:
 
 ``` clojure
-$ export PATH=$(glam --install clj-kondo/clj-kondo org.babashka/babashka):$PATH
+$ export PATH=$(clojure -M:glam --install clj-kondo/clj-kondo org.babashka/babashka):$PATH
 $ which bb
 /Users/borkdude/.glam/repository/org.babashka/babashka/0.2.1/bb
 $ which clj-kondo
