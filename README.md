@@ -25,14 +25,6 @@ Install glam by using this alias in `deps.edn`:
 Use any later SHA at your convenience or simply clone this project and use
 `:local/root`.
 
-Create an alias to reduce verbosity and store it in your favorite
-`.bashrc` analog:
-
-``` bash
-# glam
-alias glam='clojure -M:glam'
-```
-
 Package files like `<package-org>/<package-name>.glam.edn` are discovered via the classpath.
 
 E.g. in the glam repo's `packages` directory, there is `org.babashka/babashka.glam.edn`:
@@ -76,6 +68,14 @@ $ bb '(+ 1 2 3)'
 6
 ```
 
+To automate this, define the following function in your `.bashrc` analog:
+
+``` clojure
+function glam-install {
+    export PATH="$(clojure -M:glam --install $@):$PATH"
+}
+```
+
 Use `--verbose` for more output, `--force` for re-downloading packages.
 
 ### Global
@@ -83,7 +83,7 @@ Use `--verbose` for more output, `--force` for re-downloading packages.
 To install packages globally, use `--global`. This writes a path of globally installed packages to `$HOME/.glam/path`:
 
 ``` clojure
-$ glam --install clj-kondo/clj-kondo --global --verbose
+$ glam-install clj-kondo/clj-kondo --global --verbose
 ...
 Wrote /Users/borkdude/.glam/path
 /Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
@@ -93,28 +93,21 @@ Add this path to `$PATH` in your favorite `.bashrc` analog:
 
 ``` bash
 # glam
-alias glam='clojure -M:glam'
 alias glam_path='export PATH="`cat $HOME/.glam/path 2>/dev/null`:$PATH"'
-glam_path
+function glam-install {
+    export PATH="$(clojure -M:glam --install $@):$PATH"
+}
 ```
-
-Run `glam_path` again after installing to update the path for the current shell.
 
 ### Babashka
 
 Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast startup. Currently you will need the latest `0.2.2-SNAPSHOT` version. First install it using `clojure`:
 
 ``` clojure
-$ glam --install org.babashka/babashka@0.2.2-SNAPSHOT --global --verbose
+$ glam-install org.babashka/babashka@0.2.2-SNAPSHOT --global --verbose
 ...
 Wrote /Users/borkdude/.glam/path
 /Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
-```
-
-Update the current shell's path:
-
-``` clojure
-$ glam_path
 ```
 
 Now we can run glam using babashka.
@@ -134,8 +127,9 @@ To use `bb` instead of `clojure` to invoke `glam`:
 ``` bash
 # glam
 alias glam_path='export PATH="`cat $HOME/.glam/path 2>/dev/null`:$PATH"'
-glam_path
-alias glam='bb -cp $(clojure -Spath -A:glam) -m glam.main'
+function glam-install {
+    export PATH="$(bb -cp $(clojure -Spath -A:glam) -m glam.main --install $@):$PATH"
+}
 ```
 
 Or, to bundle everything into one asset e.g. for moving to another machine, use
