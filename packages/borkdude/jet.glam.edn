@@ -1,0 +1,17 @@
+{:package/name borkdude/jet
+ :package/description ""
+ :package/version "0.0.13"
+ :package/license ""
+ :package/artifacts
+ [{:os/name "Mac.*"
+   :os/arch "x86_64"
+   :artifact/url "https://github.com/borkdude/jet/releases/download/v0.0.13/jet-0.0.13-macos-amd64.zip"
+   :artifact/executables ["jet"]}
+  {:os/name "Linux.*"
+   :os/arch "amd64"
+   :artifact/url "https://github.com/borkdude/jet/releases/download/v0.0.13/jet-0.0.13-linux-amd64.zip"
+   :artifact/executables ["jet"]}
+  {:os/name "Windows.*"
+   :os/arch "amd64"
+   :artifact/url "https://github.com/borkdude/babashka/releases/download/v0.2.1/babashka-0.2.1-windows-amd64.zip"
+   :artifact/executables ["jet.exe"]}]}
