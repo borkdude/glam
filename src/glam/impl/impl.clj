@@ -150,10 +150,18 @@
         gp)
       (str/join path-sep paths))))
 
+(def windows?
+  (str/starts-with? (:os/name os) "Win"))
+
 (defn setup []
-  (let [glam-sh-dest (io/file glam-dir "scripts" "glam.sh")]
-    (io/make-parents glam-sh-dest)
-    (spit glam-sh-dest (slurp (io/resource "borkdude/glam/scripts/glam.sh")))
-    (warn "Include this in your .bashrc analog to finish setup:")
-    (warn)
-    (warn "source" "$HOME/.glam/scripts/glam.sh")))
+  (let [scripts ["glam.sh" "glam.cmd"]
+        script-dir (io/file glam-dir "scripts")]
+    (.mkdirs script-dir)
+    (doseq [s scripts]
+      (spit (io/file script-dir s)
+            (slurp (io/resource (str "borkdude/glam/scripts/" s)))))
+    (if windows?
+      (warn "Add" (str script-dir) "to %PATH% to finish setup.")
+      (do (warn "Include this in your .bashrc analog to finish setup:")
+          (warn)
+          (warn "source" "$HOME/.glam/scripts/glam.sh")))))
