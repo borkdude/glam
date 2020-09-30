@@ -44,4 +44,5 @@
                                                    (get parsed "-g")))))
         "--setup"
         (impl/setup)
-        (impl/warn "Unknown command:" subc*)))))
+        (impl/warn "Unknown command:" subc*))))
+  (shutdown-agents))

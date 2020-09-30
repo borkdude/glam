@@ -2,6 +2,7 @@
   {:no-doc true}
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :refer [sh]]
             [clojure.string :as str])
   (:import [java.net URL HttpURLConnection]
            [java.nio.file Files]))
@@ -31,12 +32,11 @@
                                  (:os/arch os)))))
             artifacts)))
 
-(defn unzip [^java.io.File zip-file ^java.io.File destination-dir executables verbose?]
+(defn unzip [^java.io.File zip-file ^java.io.File destination-dir verbose?]
   (when verbose? (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
   (let [output-path (.toPath destination-dir)
         zip-file (io/file zip-file)
-        _ (.mkdirs (io/file destination-dir))
-        executables (set executables)]
+        _ (.mkdirs (io/file destination-dir))]
     (with-open
       [fis (Files/newInputStream (.toPath zip-file) (into-array java.nio.file.OpenOption []))
        zis (java.util.zip.ZipInputStream. fis)]
@@ -48,16 +48,33 @@
                   resolved-path (.resolve output-path new-path)]
               (if (.isDirectory entry)
                 (Files/createDirectories new-path (into-array []))
-                (do (Files/copy ^java.io.InputStream zis
-                                resolved-path
-                                ^"[Ljava.nio.file.CopyOption;"
-                                (into-array
-                                 [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
-                    (when (contains? executables entry-name)
-                      (let [f (.toFile resolved-path)]
-                        (when verbose? (warn "Making" (.getPath f) "executable."))
-                        (.setExecutable f true))))))
+                (Files/copy ^java.io.InputStream zis
+                            resolved-path
+                            ^"[Ljava.nio.file.CopyOption;"
+                            (into-array
+                             [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))))
             (recur)))))))
+
+(defn un-tgz [^java.io.File zip-file ^java.io.File destination-dir verbose?]
+  (when verbose? (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
+  (let [tmp-file (java.io.File/createTempFile "glam" ".tar")
+        output-path (.toPath tmp-file)]
+    (with-open
+      [fis (Files/newInputStream (.toPath zip-file) (into-array java.nio.file.OpenOption []))
+       zis (java.util.zip.GZIPInputStream. fis)]
+      (Files/copy ^java.io.InputStream zis
+                  output-path
+                  ^"[Ljava.nio.file.CopyOption;"
+                  (into-array
+                   [java.nio.file.StandardCopyOption/REPLACE_EXISTING])))
+    (sh "tar" "xf" (.getPath tmp-file) "--directory" (.getPath destination-dir))
+    (.delete tmp-file)))
+
+(defn make-executable [dest-dir executables verbose?]
+  (doseq [e executables]
+    (let [f (io/file dest-dir e)]
+      (when verbose? (warn "Making" (.getPath f) "executable."))
+      (.setExecutable f true))))
 
 (defn download [source ^java.io.File dest verbose?]
   (when verbose? (warn "Downloading" source "to" (.getPath dest)))
@@ -124,9 +141,15 @@
                   (when verbose?
                     (warn "Package" (pkg-name package) "already installed"))
                   (do (download url dest-file verbose?)
-                      (unzip dest-file dest-dir
-                             (:artifact/executables artifact)
-                             verbose?)
+                      (let [filename (.getName dest-file)]
+                        (cond (str/ends-with? filename ".zip")
+                              (unzip dest-file dest-dir
+                                     verbose?)
+                              (or (str/ends-with? filename ".tgz")
+                                  (str/ends-with? filename ".tar.gz"))
+                              (un-tgz dest-file dest-dir
+                                      verbose?)))
+                      (make-executable dest-dir (:artifact/executables artifact) verbose?)
                       (when global?
                         (add-package-to-global package))))
                 (.getPath dest-dir))) artifacts)
