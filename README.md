@@ -58,7 +58,7 @@ Now `clj-kondo` and `bb` are available:
 
 ``` clojure
 $ which bb
-/Users/borkdude/.glam/repository/org.babashka/babashka/0.2.1/bb
+/Users/borkdude/.glam/repository/org.babashka/babashka/0.2.2/bb
 $ which clj-kondo
 /Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09/clj-kondo
 $ bb '(+ 1 2 3)'
@@ -79,10 +79,11 @@ Wrote /Users/borkdude/.glam/path
 
 ### Babashka
 
-Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast startup. Currently you will need the latest `0.2.2-SNAPSHOT` version. First install it using `glam`:
+Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast
+startup. You'll need version `0.2.2` or higher. First install it using `glam`:
 
 ``` clojure
-$ glam org.babashka/babashka@0.2.2-SNAPSHOT -g
+$ glam org.babashka/babashka -g
 ```
 
 Glam automatically detects if you have a compatible `bb` installed, so next
