@@ -11,6 +11,7 @@ Package PRs welcome.
 - Easy CI install of glam itself and the packages that it supports
 - Cross platform: support for linux, macOS and Windows (without relying on PowerShell)
 - Bring binaries into scope globally or just for one shell or directory
+- Configuration using [EDN](https://github.com/edn-format/edn)
 
 ## Install
 
