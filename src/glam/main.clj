@@ -28,7 +28,8 @@
 
 (def subcommand
   {"install" "--install"
-   "setup" "--setup"})
+   "setup" "--setup"
+   "add" "--add"})
 
 (defn -main [& args]
   (when-let [subc* (first args)]
@@ -44,5 +45,8 @@
                                                    (get parsed "-g")))))
         "--setup"
         (impl/setup)
+        "--add"
+        (impl/add-package (get parsed "--add"))
+        ;; fallback:
         (impl/warn "Unknown command:" subc*))))
   (shutdown-agents))

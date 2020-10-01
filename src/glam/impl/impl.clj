@@ -119,7 +119,8 @@
     package))
 
 (defn pkg-name [package]
-  (:package/name package))
+  (str (:package/name package) "@"
+       (:package/version package)))
 
 (def ^java.io.File glam-dir
   (io/file (System/getProperty "user.home")
@@ -198,3 +199,26 @@
     (warn "Include this in your .bashrc analog to finish setup:")
     (warn)
     (warn "source" "$HOME/.glam/scripts/glam.sh")))
+
+(defn sha256 [^String string]
+  (let [digest (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                        (.getBytes string "UTF-8"))]
+    (apply str (map (partial format "%02x") digest))))
+
+(defn add-package [[package]]
+  (let [[package version] (str/split package #"@")]
+    (if version
+      (let [template-resource (str package ".glam.template.edn")]
+        (if-let [f (io/resource template-resource)]
+          (let [f (io/as-file f)
+                pkg-dir (-> f .getParentFile .getParentFile)
+                pkg-str (slurp f)
+                pkg-str (str/replace pkg-str "{{version}}" version)
+                pkg (edn/read-string pkg-str)
+                pkg-file (io/file pkg-dir (str package "@" version ".glam.edn"))]
+            ;; TODO: add sha256
+            (install-package pkg false true false)
+            (spit pkg-file pkg-str)
+            (warn "Package created at" (str pkg-file)))
+          (warn "No template found")))
+      (warn "Please specify version using @version"))))
