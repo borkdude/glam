@@ -9,7 +9,7 @@ Package PRs welcome.
 ## Goals
 
 - Easy CI install of glam itself and the packages that it supports
-- Full Windows support without relying on PowerShell
+- Cross platform: support for linux, macOS and Windows (without relying on PowerShell)
 - Bring binaries into scope globally or just for one shell or directory
 
 ## Install
