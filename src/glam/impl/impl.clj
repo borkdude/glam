@@ -210,7 +210,7 @@
     (if version
       (let [template-resource (str package ".glam.template.edn")]
         (if-let [f (io/resource template-resource)]
-          (let [f (io/as-file f)
+          (let [f (io/file f)
                 pkg-dir (-> f .getParentFile .getParentFile)
                 pkg-str (slurp f)
                 pkg-str (str/replace pkg-str "{{version}}" version)
