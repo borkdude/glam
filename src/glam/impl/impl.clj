@@ -100,12 +100,22 @@
 
 (defn find-package-descriptor [package]
   (if (not (map? package))
-    (let [;; package (str/replace (str package) "/" ".")
-          resource (str package ".glam.edn")]
+    (let [resource (str package ".glam.edn")]
       (if-let [f (io/resource resource)]
         (let [pkg (edn/read-string (slurp f))]
           pkg)
-        (warn "Package" package "not found")))
+        ;; Template fallback
+        (let [[package version] (str/split package #"@")]
+          (if version
+            (let [template-resource (str package ".glam.template.edn")]
+              (if-let [f (io/resource template-resource)]
+                (let [pkg-str (slurp f)
+                      pkg-str (str/replace pkg-str "{{version}}" version)
+                      pkg (edn/read-string pkg-str)]
+                  (warn "Package" package "not found, attempting template fallback")
+                  pkg)
+                (warn "Package" package "not found")))
+            (warn "Package" package "not found")))))
     package))
 
 (defn pkg-name [package]
