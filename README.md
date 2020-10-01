@@ -8,7 +8,7 @@ Package PRs welcome.
 
 ## Goals
 
-- Easy CI install of glam itself and installing packages with it
+- Easy CI install of glam itself and the packages that it supports
 - Full Windows support
 - Bring binaries into scope for just one shell, directory or globally.
 
