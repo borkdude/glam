@@ -2,15 +2,21 @@
 
 A cross-platform package manager for projects that rock.
 
-Glam offers a flexible way to bring binaries into scope globally or for just one shell.
-
 Work in progress, not ready for production, breaking changes will happen.
 
 Package PRs welcome.
 
+## Goals
+
+- Easy CI install of glam itself and installing packages with it
+- Full Windows support
+- Bring binaries into scope for just one shell, directory or globally.
+
 ## Install
 
-Glam uses the [Clojure CLI](https://clojure.org/guides/deps_and_cli).
+Glam currently uses the [Clojure
+CLI](https://clojure.org/guides/deps_and_cli). This will change: we will
+probably move to a GraalVM compiled binary.
 
 Install glam by using this alias in `deps.edn`:
 
@@ -42,8 +48,8 @@ Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by
 ## Usage
 
 Package files like `<package-org>/<package-name>.glam.edn` are discovered via
-the classpath. This means that in addition to glam's own packages you can add
-your own.
+the classpath (currenly, this will change when moving away from the JVM). This
+means that in addition to glam's own packages you can add your own.
 
 E.g. in the glam repo's `packages` directory, there is a
 `org.babashka/babashka.glam.edn`.
