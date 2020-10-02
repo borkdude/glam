@@ -44,10 +44,7 @@ glam_join_paths() {
 }
 
 glam() {
-    export PATH
-    export GLAM_GLOBAL_PATH
     glam_detect_bb
-    glam_global_path
     extra_path=""
     if [ "$GLAM_BABASHKA" = "true" ]
     then
