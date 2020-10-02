@@ -34,7 +34,8 @@ Install glam by using this alias in `deps.edn`:
 Use any later SHA at your convenience or simply clone this project and use
 `:local/root`.
 
-Additionally, install a shell helper script by running this and following the instructions:
+Additionally, install a shell helper script and pull package repos by running
+this and following the instructions:
 
 ``` shell
 $ clojure -M:glam setup
@@ -48,12 +49,11 @@ Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by
 
 ## Usage
 
-Package files like `<package-org>/<package-name>.glam.edn` are discovered via
-the classpath (currenly, this will change when moving away from the JVM). This
-means that in addition to glam's own packages you can add your own.
+Package files like `<package-org>/<package-name>.glam.edn` are listed in package
+repos downloaded to `$HOME/.glam/packages`. The main package repo is in
+`$HOME/.glam/packages/glam/core`, but you can add your own repos in a config file (docs for this will come).
 
-E.g. in the glam repo's `packages` directory, there is a
-`org.babashka/babashka.glam.edn`.
+E.g. in`packages/glam/core` there is a `org.babashka/babashka.glam.edn`.
 
 To install packages for the current shell:
 

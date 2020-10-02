@@ -44,7 +44,7 @@
                                       (boolean (or (get parsed "--global")
                                                    (get parsed "-g")))))
         "--setup"
-        (impl/setup)
+        (impl/setup (boolean (get parsed "--force")))
         "--add"
         (impl/add-package (get parsed "--add"))
         ;; fallback:

@@ -98,17 +98,57 @@
            (str package-name)
            package-version))
 
+(def glam-dir
+  (delay (io/file (System/getProperty "user.home")
+                  ".glam")))
+
+(def global-install-file
+  (delay (io/file @glam-dir
+                  "installed.edn")))
+
+(def cfg-dir
+  (delay (let [config-dir (or (System/getenv "XDG_CONFIG_HOME")
+                              (io/file (System/getProperty "user.home")
+                                       ".config"))]
+           (io/file config-dir "glam"))))
+
+(def cfg-file
+  (delay (io/file @cfg-dir "config.edn")))
+
+(defn config []
+  (edn/read-string (slurp @cfg-file)))
+
+(defn repo-dir [repo-name]
+  (io/file @glam-dir "packages" (str repo-name)))
+
+(defn repo-dirs [cfg]
+  (let [repos (:package/repos cfg)
+        names (map :repo/name repos)]
+    (map repo-dir names)))
+
+(defn package-resource
+  ([package-name]
+   (package-resource package-name (config)))
+  ([package-name cfg]
+   (let [dirs (repo-dirs cfg)
+         f (str package-name)]
+     (some (fn [dir]
+             (let [f (io/file dir f)]
+               (when (.exists f)
+                 f)))
+           dirs))))
+
 (defn find-package-descriptor [package]
   (if (not (map? package))
     (let [resource (str package ".glam.edn")]
-      (if-let [f (io/resource resource)]
+      (if-let [f (package-resource resource)]
         (let [pkg (edn/read-string (slurp f))]
           pkg)
         ;; Template fallback
         (let [[package version] (str/split package #"@")]
           (if version
             (let [template-resource (str package ".glam.template.edn")]
-              (if-let [f (io/resource template-resource)]
+              (if-let [f (package-resource template-resource)]
                 (let [pkg-str (slurp f)
                       pkg-str (str/replace pkg-str "{{version}}" version)
                       pkg (edn/read-string pkg-str)]
@@ -122,23 +162,15 @@
   (str (:package/name package) "@"
        (:package/version package)))
 
-(def ^java.io.File glam-dir
-  (io/file (System/getProperty "user.home")
-           ".glam"))
-
-(def ^java.io.File global-install-file
-  (io/file glam-dir
-           "installed.edn"))
-
 (defn ensure-global-path-exists []
-  (when-not (.exists global-install-file)
-    (spit global-install-file "")))
+  (when-not (.exists (io/file @global-install-file))
+    (spit @global-install-file "")))
 
 (defn add-package-to-global [package]
   (ensure-global-path-exists)
-  (let [installed (edn/read-string (slurp global-install-file))
+  (let [installed (edn/read-string (slurp @global-install-file))
         installed (assoc installed (:package/name package) (:package/version package))]
-    (spit global-install-file installed)))
+    (spit @global-install-file installed)))
 
 (defn install-package [package force? verbose? global?]
   (when-let [package (find-package-descriptor package)]
@@ -170,9 +202,9 @@
 
 (defn global-path []
   (ensure-global-path-exists)
-  (let [installed (edn/read-string (slurp global-install-file))
+  (let [installed (edn/read-string (slurp @global-install-file))
         paths (reduce (fn [acc [k v]]
-                        (conj acc (.getPath (io/file glam-dir
+                        (conj acc (.getPath (io/file @glam-dir
                                                      "repository"
                                                      (str k)
                                                      (str v)))))
@@ -185,17 +217,46 @@
         paths (mapv #(install-package % force? verbose? global?) packages)]
     (if global?
       (let [gp (global-path)
-            gpf (io/file glam-dir "path")]
+            gpf (io/file @glam-dir "path")]
         (spit gpf gp)
         (when verbose?
           (warn "Wrote" (.getPath gpf)))
         gp)
       (str/join path-sep paths))))
 
-(defn setup []
-  (let [glam-sh-dest (io/file glam-dir "scripts" "glam.sh")]
+(defn pull-packages []
+  (let [cfg (edn/read-string (slurp @cfg-file))]
+    (doseq [{repo-name :repo/name
+             git-url   :git/url} (:package/repos cfg)]
+      (let [repo-dir (io/file (io/file (System/getProperty "user.home")
+                                       ".glam" "packages")
+                              (str repo-name))
+            exists? (.exists repo-dir)]
+        (if exists?
+          (do
+            (warn "Pulling" git-url "to" (str repo-dir))
+            ;; TODO: error handling
+            (sh "git" "-C" (.getPath repo-dir) "pull" git-url))
+          (do
+            (.mkdirs repo-dir)
+            (warn "Cloning" git-url "to" (str repo-dir))
+            (sh "git" "-C" (.getParent repo-dir) "clone" git-url
+                (last (str/split (str repo-dir) #"/")))))))))
+
+(def default-config
+  '{:package/repos [{:repo/name glam/core
+                     :git/url "https://github.com/glam-pm/packages"}]})
+
+(defn setup [force?]
+  (let [glam-sh-dest (io/file @glam-dir "scripts" "glam.sh")]
     (io/make-parents glam-sh-dest)
     (spit glam-sh-dest (slurp (io/resource "borkdude/glam/scripts/glam.sh")))
+    (let [cfg-file (io/file @cfg-dir "config.edn")]
+      (when (or (not (.exists cfg-file))
+                force?)
+        (io/make-parents cfg-file)
+        (spit cfg-file default-config)))
+    (pull-packages)
     (warn "Include this in your .bashrc analog to finish setup:")
     (warn)
     (warn "source" "$HOME/.glam/scripts/glam.sh")))
@@ -209,7 +270,7 @@
   (let [[package version] (str/split package #"@")]
     (if version
       (let [template-resource (str package ".glam.template.edn")]
-        (if-let [f (io/resource template-resource)]
+        (if-let [f (package-resource template-resource)]
           (let [f (io/file f)
                 pkg-dir (-> f .getParentFile .getParentFile)
                 pkg-str (slurp f)
