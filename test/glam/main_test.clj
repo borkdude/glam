@@ -1,5 +1,22 @@
 (ns glam.main-test
-  (:require [glam.main :as main]
-            [clojure.test :as t :refer [deftest is testing]]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.test :as t :refer [deftest is #_testing]]
+            [glam.main :as main]))
 
-(deftest x)
+(deftest setup-test
+  (with-out-str
+    (binding [*err* *out*] (main/main "setup"))))
+
+(deftest install-test
+  (let [output (with-out-str (main/main "install" "org.babashka/babashka@0.2.2" #_"--verbose"))
+        data-dir (io/file "test-dir" ".data" ".glam" "repository" "org.babashka" "babashka" "0.2.2")
+        bb-executable (io/file data-dir "bb")]
+    (is (.exists data-dir) (str data-dir "doesn't exist"))
+    (is (.exists bb-executable))
+    (is (.canExecute bb-executable))
+    (is (str/includes? output (.getPath data-dir)))))
+
+(defn test-ns-hook []
+  (setup-test)
+  (install-test))

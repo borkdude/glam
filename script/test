@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
-export XDG_CONFIG_HOME
-XDG_CONFIG_HOME=test/install_dir
+if [ "$1" == "clean" ]
+then
+    rm -rf test-dir
+fi
 
+export XDG_CONFIG_HOME
+mkdir -p test-dir/.config
+XDG_CONFIG_HOME=test-dir/.config
+
+export XDG_DATA_HOME
+mkdir -p test-dir/.data
+XDG_DATA_HOME=test-dir/.data
+
+export XDG_CACHE_HOME
+mkdir -p test-dir/.cache
+XDG_CACHE_HOME=test-dir/.cache
+
+clojure -M:test

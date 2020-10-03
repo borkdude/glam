@@ -32,8 +32,10 @@
                                  (:os/arch os)))))
             artifacts)))
 
-(defn unzip [^java.io.File zip-file ^java.io.File destination-dir verbose?]
-  (when verbose? (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
+(defn unzip [{:keys [^java.io.File zip-file
+                     ^java.io.File destination-dir
+                     verbose]}]
+  (when verbose (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
   (let [output-path (.toPath destination-dir)
         zip-file (io/file zip-file)
         _ (.mkdirs (io/file destination-dir))]
@@ -44,12 +46,11 @@
         (let [entry (.getNextEntry zis)]
           (when entry
             (let [entry-name (.getName entry)
-                  new-path (.resolve output-path entry-name)
-                  resolved-path (.resolve output-path new-path)]
+                  new-path (.resolve output-path entry-name)]
               (if (.isDirectory entry)
                 (Files/createDirectories new-path (into-array []))
                 (Files/copy ^java.io.InputStream zis
-                            resolved-path
+                            new-path
                             ^"[Ljava.nio.file.CopyOption;"
                             (into-array
                              [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))))
@@ -87,16 +88,6 @@
     (with-open [is (.getInputStream conn)]
       (io/copy is dest))
     (when verbose? (warn "Download complete."))))
-
-(defn destination-dir
-  ^java.io.File
-  [{package-name :package/name
-    package-version :package/version}]
-  (io/file (System/getProperty "user.home")
-           ".glam"
-           "repository"
-           (str package-name)
-           package-version))
 
 (def glam-dir
   (delay (io/file (System/getProperty "user.home")
@@ -172,31 +163,57 @@
         installed (assoc installed (:package/name package) (:package/version package))]
     (spit @global-install-file installed)))
 
+(defn cache-dir
+  ^java.io.File
+  [{package-name :package/name
+    package-version :package/version}]
+  (io/file (or
+            (System/getenv "XDG_CACHE_HOME")
+            (System/getProperty "user.home"))
+           ".glam"
+           "repository"
+           (str package-name)
+           package-version))
+
+(defn data-dir
+  ^java.io.File
+  [{package-name :package/name
+    package-version :package/version}]
+  (io/file (or
+            (System/getenv "XDG_DATA_HOME")
+            (System/getProperty "user.home"))
+           ".glam"
+           "repository"
+           (str package-name)
+           package-version))
+
 (defn install-package [package force? verbose? global?]
   (when-let [package (find-package-descriptor package)]
     (let [artifacts (match-artifacts package)
-          dest-dir (destination-dir package)]
+          cdir (cache-dir package)
+          ddir (data-dir package)]
       (mapv (fn [artifact]
               (let [url (:artifact/url artifact)
                     file-name (last (str/split url #"/"))
-                    dest-file (io/file dest-dir file-name)]
-                (if (and (not force?) (.exists dest-file))
+                    cache-file (io/file cdir file-name)]
+                (if (and (not force?) (.exists cdir))
                   (when verbose?
                     (warn "Package" (pkg-name package) "already installed"))
-                  (do (download url dest-file verbose?)
-                      (let [filename (.getName dest-file)]
+                  (do (download url cache-file verbose?)
+                      (let [filename (.getName cache-file)]
                         (cond (str/ends-with? filename ".zip")
-                              (unzip dest-file dest-dir
-                                     verbose?)
+                              (unzip {:zip-file cache-file
+                                      :destination-dir ddir
+                                      :verbose verbose?})
                               (or (str/ends-with? filename ".tgz")
                                   (str/ends-with? filename ".tar.gz"))
-                              (un-tgz dest-file dest-dir
+                              (un-tgz cache-file ddir
                                       verbose?)))
-                      (make-executable dest-dir (:artifact/executables artifact) verbose?)
+                      (make-executable ddir (:artifact/executables artifact) verbose?)
                       (when global?
                         (add-package-to-global package))))
-                (.getPath dest-dir))) artifacts)
-      dest-dir)))
+                (.getPath ddir))) artifacts)
+      ddir)))
 
 (def path-sep (System/getProperty "path.separator"))
 

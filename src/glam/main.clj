@@ -31,7 +31,8 @@
    "setup" "--setup"
    "add" "--add"})
 
-(defn -main [& args]
+(defn main
+  [& args]
   (when-let [subc* (first args)]
     (let [subc (get subcommand subc* subc*)
           args (cons subc (rest args))
@@ -48,5 +49,8 @@
         "--add"
         (impl/add-package (get parsed "--add"))
         ;; fallback:
-        (impl/warn "Unknown command:" subc*))))
+        (impl/warn "Unknown command:" subc*)))))
+
+(defn -main [& args]
+  (apply main args)
   (shutdown-agents))
