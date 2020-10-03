@@ -16,9 +16,13 @@
 (def boolean-flags
   #{"--force" "--verbose" "--global" "-g"})
 
+(def subcommands #{"install" "setup"
+                   "package" "add" "set-current"})
+
 (defn parse-args [args]
   (->> args
-       (split-when #(str/starts-with? % "-"))
+       (split-when #(or (str/starts-with? % "-")
+                        (contains? subcommands %)))
        (reduce (fn [acc [k & vs]]
                  (assoc acc k
                         (or vs
@@ -26,30 +30,28 @@
                               true))))
                {})))
 
-(def subcommand
-  {"install" "--install"
-   "setup" "--setup"
-   "add" "--add"})
-
 (defn main
   [& args]
-  (when-let [subc* (first args)]
-    (let [subc (get subcommand subc* subc*)
-          args (cons subc (rest args))
-          parsed (parse-args args)]
+  (when-let [subc (first args)]
+    (let [parsed (parse-args args)]
       (case subc
-        "--install"
-        (println (impl/path-with-pkgs (get parsed "--install")
+        "install"
+        (println (impl/path-with-pkgs (get parsed "install")
                                       (boolean (get parsed "--force"))
                                       (boolean (get parsed "--verbose"))
                                       (boolean (or (get parsed "--global")
                                                    (get parsed "-g")))))
-        "--setup"
-        (impl/setup (boolean (get parsed "--force")))
-        "--add"
-        (impl/add-package (get parsed "--add"))
+        "setup"
+        (let [parsed (parse-args (cons subc (rest args)))]
+          (impl/setup (boolean (get parsed "--force"))))
+        "package"
+        (case (second args)
+          "add"
+          (impl/package-add (get parsed "add"))
+          "set-current"
+          (impl/package-set-current (get parsed "set-current")))
         ;; fallback:
-        (impl/warn "Unknown command:" subc*)))))
+        (impl/warn "Unknown command:" subc)))))
 
 (defn -main [& args]
   (apply main args)

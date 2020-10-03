@@ -285,20 +285,31 @@
                         (.getBytes string "UTF-8"))]
     (apply str (map (partial format "%02x") digest))))
 
-(defn add-package [[package]]
+(defn package-add [[package]]
   (let [[package version] (str/split package #"@")]
     (if version
-      (let [template-resource (str package ".glam.template.edn")]
-        (if-let [f (package-resource template-resource)]
-          (let [f (io/file f)
-                pkg-dir (-> f .getParentFile .getParentFile)
+      (let [template-resource (str package ".glam.template.edn")
+            f (io/file template-resource)]
+        (if (.exists f)
+          (let [pkg-dir (-> f .getParentFile .getParentFile)
                 pkg-str (slurp f)
                 pkg-str (str/replace pkg-str "{{version}}" version)
-                pkg (edn/read-string pkg-str)
                 pkg-file (io/file pkg-dir (str package "@" version ".glam.edn"))]
-            ;; TODO: add sha256
-            (install-package pkg false true false)
             (spit pkg-file pkg-str)
             (warn "Package created at" (str pkg-file)))
           (warn "No template found")))
+      (warn "Please specify version using @version"))))
+
+(defn package-set-current [[package-with-version]]
+  (let [[package version] (str/split package-with-version #"@")]
+    (if version
+      (let [resource (str package-with-version ".glam.edn")
+            f (io/file resource)]
+        (if (.exists f)
+          (let [pkg-dir (-> f .getParentFile .getParentFile)
+                pkg-str (slurp f)
+                pkg-file (io/file pkg-dir (str package ".glam.edn"))]
+            (spit pkg-file pkg-str)
+            (warn "Package created at" (str pkg-file)))
+          (warn "Package not found:" package-with-version)))
       (warn "Please specify version using @version"))))
