@@ -19,6 +19,16 @@
     (is (.canExecute bb-executable))
     (is (str/includes? output (.getPath data-dir)))))
 
+(deftest install-global-test
+  ;; TODO: global install test
+  ;; Check: if installed.edn and path file are correctly set
+  ;; Btw, we probably also have to update our bash script to account for XDG_CONFIG_HOME and XDG_DATA_HOME
+  )
+
+(deftest config-test
+  ;; TODO: repositories.edn
+  )
+
 (defn test-ns-hook []
   (setup-test)
   (install-test))
