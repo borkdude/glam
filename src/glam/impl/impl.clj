@@ -189,6 +189,19 @@
            (str package-name)
            package-version))
 
+(defn sha256 [file]
+  (let [buf (byte-array 8192)
+        digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (with-open [bis (io/input-stream (io/file file))]
+      (loop []
+        (let [count (.read bis buf)]
+          (when (pos? count)
+            (.update digest buf 0 count)
+            (recur)))))
+    (-> (.encode (java.util.Base64/getEncoder)
+                 (.digest digest))
+        (String. "UTF-8"))))
+
 (defn install-package [package force? verbose? global?]
   (when-let [package (find-package-descriptor package)]
     (let [artifacts (match-artifacts package)
@@ -202,6 +215,13 @@
                   (when verbose?
                     (warn "Package" (pkg-name package) "already installed"))
                   (do (download url cache-file verbose?)
+                      (when-let [expected-sha (:artifact/hash artifact)]
+                        (let [sha (sha256 cache-file)]
+                          (when-not (= (str/replace expected-sha #"^sha256:" "")
+                                       sha)
+                            (throw (ex-info (str "Wrong SHA-256 for file" (str cache-file))
+                                            {:sha sha
+                                             :expected-sha expected-sha})))))
                       (let [filename (.getName cache-file)]
                         (cond (str/ends-with? filename ".zip")
                               (unzip {:zip-file cache-file
@@ -280,10 +300,17 @@
     (warn)
     (warn "source" "$HOME/.glam/scripts/glam.sh")))
 
-(defn sha256 [^String string]
-  (let [digest (.digest (java.security.MessageDigest/getInstance "SHA-256")
-                        (.getBytes string "UTF-8"))]
-    (apply str (map (partial format "%02x") digest))))
+(defn artifact-sha [artifact]
+  (when-let [k (:artifact/hash artifact)]
+    (let [url (:artifact/url artifact)
+          tmp-file (java.io.File/createTempFile "glam" "glam")
+          _ (download url tmp-file true)
+          sha (sha256 tmp-file)
+          _ (.delete tmp-file)]
+      [k sha])))
+
+(defn calculate-hashes [pkg]
+  (map artifact-sha (:package/artifacts pkg)))
 
 (defn package-add [[package]]
   (let [[package version] (str/split package #"@")]
@@ -294,6 +321,12 @@
           (let [pkg-dir (-> f .getParentFile .getParentFile)
                 pkg-str (slurp f)
                 pkg-str (str/replace pkg-str "{{version}}" version)
+                pkg-edn (edn/read-string pkg-str)
+                replacements (calculate-hashes pkg-edn)
+                pkg-str (reduce (fn [acc [k v]]
+                                  (str/replace acc k (str "sha256:" v)))
+                                pkg-str
+                                replacements)
                 pkg-file (io/file pkg-dir (str package "@" version ".glam.edn"))]
             (spit pkg-file pkg-str)
             (warn "Package created at" (str pkg-file)))
