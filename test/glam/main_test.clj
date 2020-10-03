@@ -12,7 +12,7 @@
   (let [output (with-out-str (main/main "install" "org.babashka/babashka@0.2.2" #_"--verbose"))
         data-dir (io/file "test-dir" ".data" ".glam" "repository" "org.babashka" "babashka" "0.2.2")
         bb-executable (io/file data-dir "bb")]
-    (is (.exists data-dir) (str data-dir "doesn't exist"))
+    (is (.exists data-dir) (str data-dir " doesn't exist"))
     (is (.exists bb-executable))
     (is (.canExecute bb-executable))
     (is (str/includes? output (.getPath data-dir)))))

@@ -106,22 +106,24 @@
 (def cfg-file
   (delay (io/file @cfg-dir "config.edn")))
 
-(defn config []
-  (edn/read-string (slurp @cfg-file)))
+(def repo-cfg-file
+  (delay (io/file @cfg-dir "repositories.edn")))
+
+(defn repo-config []
+  (edn/read-string (slurp @repo-cfg-file)))
 
 (defn repo-dir [repo-name]
   (io/file @glam-dir "packages" (str repo-name)))
 
-(defn repo-dirs [cfg]
-  (let [repos (:package/repos cfg)
-        names (map :repo/name repos)]
+(defn repo-dirs [repo-cfg]
+  (let [names (map :repo/name repo-cfg)]
     (map repo-dir names)))
 
 (defn package-resource
   ([package-name]
-   (package-resource package-name (config)))
-  ([package-name cfg]
-   (let [dirs (repo-dirs cfg)
+   (package-resource package-name (repo-config)))
+  ([package-name repo-cfg]
+   (let [dirs (repo-dirs repo-cfg)
          f (str package-name)]
      (some (fn [dir]
              (let [f (io/file dir f)]
@@ -242,9 +244,9 @@
       (str/join path-sep paths))))
 
 (defn pull-packages []
-  (let [cfg (edn/read-string (slurp @cfg-file))]
+  (let [cfg (repo-config)]
     (doseq [{repo-name :repo/name
-             git-url   :git/url} (:package/repos cfg)]
+             git-url   :git/url} cfg]
       (let [repo-dir (io/file (io/file (System/getProperty "user.home")
                                        ".glam" "packages")
                               (str repo-name))
@@ -260,19 +262,19 @@
             (sh "git" "-C" (.getParent repo-dir) "clone" git-url
                 (last (str/split (str repo-dir) #"/")))))))))
 
-(def default-config
-  '{:package/repos [{:repo/name glam/core
-                     :git/url "https://github.com/glam-pm/packages"}]})
+(def default-repo-config
+  '[{:repo/name glam/core
+     :git/url "https://github.com/glam-pm/packages"}])
 
 (defn setup [force?]
   (let [glam-sh-dest (io/file @glam-dir "scripts" "glam.sh")]
     (io/make-parents glam-sh-dest)
     (spit glam-sh-dest (slurp (io/resource "borkdude/glam/scripts/glam.sh")))
-    (let [cfg-file (io/file @cfg-dir "config.edn")]
-      (when (or (not (.exists cfg-file))
+    (let [repo-cfg-file (io/file @cfg-dir "repositories.edn")]
+      (when (or (not (.exists repo-cfg-file))
                 force?)
-        (io/make-parents cfg-file)
-        (spit cfg-file default-config)))
+        (io/make-parents repo-cfg-file)
+        (spit repo-cfg-file default-repo-config)))
     (pull-packages)
     (warn "Include this in your .bashrc analog to finish setup:")
     (warn)
