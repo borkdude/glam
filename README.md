@@ -2,9 +2,7 @@
 
 A cross-platform package manager for projects that rock.
 
-Work in progress, not ready for production, breaking changes will happen.
-
-Package PRs welcome.
+Work in progress, still in flux, not ready for production, breaking changes will happen.
 
 ## Goals
 
