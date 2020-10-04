@@ -251,9 +251,9 @@
                       installed)]
     (str/join path-sep paths)))
 
-(defn path-with-pkgs [packages force? verbose? global?]
-  (let [packages (keep find-package-descriptor packages)
-        paths (mapv #(install-package % force? verbose? global?) packages)]
+(defn install [packages force? verbose? global?]
+  (let [pkgs (keep find-package-descriptor packages)
+        paths (keep #(install-package % force? verbose? global?) pkgs)]
     (if global?
       (let [gp (global-path)
             gpf (io/file @glam-dir "path")]
@@ -261,7 +261,11 @@
         (when verbose?
           (warn "Wrote" (.getPath gpf)))
         gp)
-      (str/join path-sep paths))))
+      {:path (str/join path-sep paths)
+       :exit (if (= (count packages)
+                    (count paths))
+               0
+               1)})))
 
 (defn pull-packages []
   (let [cfg (repo-config)]

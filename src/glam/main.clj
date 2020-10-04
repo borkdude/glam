@@ -36,11 +36,14 @@
     (let [parsed (parse-args args)]
       (case subc
         "install"
-        (println (impl/path-with-pkgs (get parsed "install")
-                                      (boolean (get parsed "--force"))
-                                      (boolean (get parsed "--verbose"))
-                                      (boolean (or (get parsed "--global")
-                                                   (get parsed "-g")))))
+        (let [{:keys [:path :exit]}
+              (impl/install (get parsed "install")
+                            (boolean (get parsed "--force"))
+                            (boolean (get parsed "--verbose"))
+                            (boolean (or (get parsed "--global")
+                                         (get parsed "-g"))))]
+          (println path)
+          exit)
         "setup"
         (let [parsed (parse-args (cons subc (rest args)))]
           (impl/setup (boolean (get parsed "--force"))))
@@ -54,5 +57,6 @@
         (impl/warn "Unknown command:" subc)))))
 
 (defn -main [& args]
-  (apply main args)
-  (shutdown-agents))
+  (let [exit (apply main args)]
+    (shutdown-agents)
+    (System/exit (or exit 0))))
