@@ -48,11 +48,13 @@ glam() {
     extra_path=""
     if [ "$GLAM_BABASHKA" = "true" ]
     then
-        extra_path=$(bb -cp "$(clojure -Spath -A:glam)" -m glam.main -- "$@")
+        extra_path=$(bb -cp "$(clojure -Spath -M:glam)" -m glam.main -- "$@")
     else
         extra_path=$(clojure -M:glam "$@")
     fi
+    exit_code=$?
     GLAM_GLOBAL_PATH="$(glam_join_paths "$extra_path" "$GLAM_GLOBAL_PATH")"
     PATH=$(glam_join_paths "$GLAM_GLOBAL_PATH" "$GLAM_SYS_PATH")
-    echo "$GLAM_GLOBAL_PATH"
+    # echo "$GLAM_GLOBAL_PATH"
+    exit $exit_code
 }
