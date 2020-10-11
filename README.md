@@ -13,8 +13,10 @@ Work in progress, still in flux, not ready for production, breaking changes will
 
 ## Install
 
-Navigate to the latest build on CircleCI and download a binary for linux or
-macOS. Binaries for Windows are coming soon. Unzip the binary, place it on your path and run:
+Navigate to the latest build on
+[CircleCI](https://app.circleci.com/pipelines/github/borkdude/glam) and download
+a binary for linux or macOS. Binaries for Windows are coming soon. Unzip the
+binary, place it on your path and run:
 
 ``` clojure
 $ glam-bin setup
