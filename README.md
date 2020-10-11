@@ -87,6 +87,8 @@ To save installation settings for a project directory, create a `glam.edn` with 
 {:glam/deps {org.babashka/babashka "0.2.2"}}
 ```
 
+To use the latest version, use `org.babashka/babashka :latest`.
+
 Then run `glam install` and the deps should be added to the path.
 
 ### Global
@@ -96,6 +98,8 @@ To install packages globally, add to `:glam/deps` in `$HOME/.config/glam/glam.ed
 ``` clojure
 {org.babashka/babashka "0.2.2}
 ```
+
+To use the latest version, use `org.babashka/babashka :latest`.
 
 Run `glam install` and the global package should be added to the path.
 
