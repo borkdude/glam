@@ -277,7 +277,7 @@
       (let [repo-dir (io/file (io/file (System/getProperty "user.home")
                                        ".glam" "packages")
                               (str repo-name))
-            exists? (.exists repo-dir)]
+            exists? (.exists (io/file repo-dir ".git"))]
         (if exists?
           (do
             (warn "Pulling" git-url "to" (str repo-dir))
