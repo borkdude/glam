@@ -101,6 +101,12 @@ $ bb '(+ 1 2 3)'
 
 Use `--verbose` for more output, `--force` for re-downloading packages.
 
+To install a specific versions:
+
+``` clojure
+$ glam install clj-kondo/clj-kondo@2020.09.09 org.babashka/babashka@0.2.2
+```
+
 ### Project
 
 To save installation settings for a project directory, create a `glam.edn` with the following contents:
@@ -109,7 +115,7 @@ To save installation settings for a project directory, create a `glam.edn` with 
 {:glam/deps {org.babashka/babashka "0.2.2"}}
 ```
 
-To use the latest version, use `org.babashka/babashka :latest`.
+To use the latest version, use `{org.babashka/babashka :latest}`.
 
 Then run `glam install` and the deps should be added to the path.
 
@@ -120,8 +126,6 @@ To install packages globally, add to `:glam/deps` in `$HOME/.config/glam/glam.ed
 ``` clojure
 {org.babashka/babashka "0.2.2}
 ```
-
-To use the latest version, use `org.babashka/babashka :latest`.
 
 Run `glam install` and the global package should be added to the path.
 
