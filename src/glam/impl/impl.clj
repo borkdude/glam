@@ -237,7 +237,8 @@
       (let [edn (edn/read-string (slurp glam-edn))
             deps (:glam/deps edn)
             deps (mapv (fn [[k v]]
-                         (str k "@" v))
+                         (str k (when-not (identical? v :latest)
+                                  (str "@" v))))
                        deps)]
         deps))))
 
