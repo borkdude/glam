@@ -54,6 +54,7 @@ $ apt-get update && apt-get install curl git unzip -y
 $ curl -sLO https://30-298997735-gh.circle-artifacts.com/0/release/glam-0.0.1-SNAPSHOT-linux-amd64.zip
 $ unzip glam-0.0.1-SNAPSHOT-linux-amd64.zip
 $ mv glam-bin /usr/local/bin
+$ glam-bin setup
 $ source $HOME/.glam/scripts/glam.sh
 
 # installing clj-kondo and babashka:
