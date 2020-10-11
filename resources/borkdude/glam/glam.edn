@@ -1,0 +1,4 @@
+{:glam/repos
+ [{:repo/name glam/core
+   :git/url "https://github.com/glam-pm/packages"}]
+ :glam/deps {}}

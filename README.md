@@ -41,13 +41,24 @@ source $HOME/.glam/scripts/glam.sh
 Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by
 `clojure -M:glam` and append the printed path to `%PATH%` yourself.
 
+After setting up, you will find a `glam.edn` in `$HOME/.config/glam` with the following contents:
+
+``` clojure
+{:glam/repos
+ [{:repo/name glam/core
+   :git/url "https://github.com/glam-pm/packages"}]
+ :glam/deps {}}
+```
+
 ## Usage
 
 Package files like `<package-org>/<package-name>.glam.edn` are listed in package
 repos downloaded to `$HOME/.glam/packages`. The main package repo is in
-`$HOME/.glam/packages/glam/core`, but you can add your own repos in a config file (docs for this will come).
+`$HOME/.glam/packages/glam/core`, but you can add your own repos in the config file.
 
 E.g. in`packages/glam/core` there is a `org.babashka/babashka.glam.edn`.
+
+## Current shell
 
 To install packages for the current shell:
 
@@ -68,53 +79,29 @@ $ bb '(+ 1 2 3)'
 
 Use `--verbose` for more output, `--force` for re-downloading packages.
 
-### Global
+### Project
 
-To install packages globally, use `--global` or `-g`.
+To save installation settings for a project directory, create a `glam.edn` with the following contents:
 
 ``` clojure
-$ glam install clj-kondo/clj-kondo -g --verbose
-...
-Wrote /Users/borkdude/.glam/path
+{:glam/deps {org.babashka/babashka "0.2.2"}}
 ```
 
-<!-- ### Babashka -->
+To use the latest version, use `org.babashka/babashka :latest`.
 
-<!-- Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast -->
-<!-- startup. You'll need version `0.2.2` or higher. First install it using `glam`: -->
+Then run `glam install` and the deps should be added to the path.
 
-<!-- ``` clojure -->
-<!-- $ glam org.babashka/babashka -g -->
-<!-- ``` -->
+### Global
 
-<!-- Glam automatically detects if you have a compatible `bb` installed, so next -->
-<!-- `glam` invocations are invoked using `bb`: -->
+To install packages globally, add to `:glam/deps` in `$HOME/.config/glam/glam.edn`:
 
-<!-- ``` clojure -->
-<!-- $ time (glam) -->
-<!-- ( glam; )   0.03s  user 0.03s system 93% cpu 0.065 total -->
-<!-- ``` -->
+``` clojure
+{org.babashka/babashka "0.2.2}
+```
 
-<!-- #### Uberjar -->
+To use the latest version, use `org.babashka/babashka :latest`.
 
-<!-- To bundle the package manager and packages into one asset e.g. for moving to another machine, use -->
-<!-- babashka's `--uberjar` option: -->
-
-<!-- ``` clojure -->
-<!-- $ bb -cp $(clojure -Spath -A:glam) -m glam.main --uberjar glam.jar -->
-<!-- ``` -->
-
-<!-- This uberjar contains all packages from the classpath and the package manager -->
-<!-- itself. You can then run it from anywhere on your system: -->
-
-<!-- ``` clojure -->
-<!-- $ mv glam.jar /tmp -->
-<!-- $ cd /tmp -->
-<!-- $ bb -jar glam.jar install clj-kondo/clj-kondo -g --verbose -->
-<!-- ... -->
-<!-- Wrote /Users/borkdude/.glam/path -->
-<!-- /Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09 -->
-<!-- ``` -->
+Run `glam install` and the global package should be added to the path.
 
 ## License
 
