@@ -93,10 +93,6 @@
   (delay (io/file (System/getProperty "user.home")
                   ".glam")))
 
-(def global-install-file
-  (delay (io/file @glam-dir
-                  "installed.edn")))
-
 (def cfg-dir
   (delay (let [config-dir (or (System/getenv "XDG_CONFIG_HOME")
                               (io/file (System/getProperty "user.home")
@@ -104,13 +100,10 @@
            (io/file config-dir "glam"))))
 
 (def cfg-file
-  (delay (io/file @cfg-dir "config.edn")))
-
-(def repo-cfg-file
-  (delay (io/file @cfg-dir "repositories.edn")))
+  (delay (io/file @cfg-dir "glam.edn")))
 
 (defn repo-config []
-  (edn/read-string (slurp @repo-cfg-file)))
+  (:glam/repos (edn/read-string (slurp @cfg-file))))
 
 (defn repo-dir [repo-name]
   (io/file @glam-dir "packages" (str repo-name)))
@@ -155,16 +148,6 @@
   (str (:package/name package) "@"
        (:package/version package)))
 
-(defn ensure-global-path-exists []
-  (when-not (.exists (io/file @global-install-file))
-    (spit @global-install-file "")))
-
-(defn add-package-to-global [package]
-  (ensure-global-path-exists)
-  (let [installed (edn/read-string (slurp @global-install-file))
-        installed (assoc installed (:package/name package) (:package/version package))]
-    (spit @global-install-file installed)))
-
 (defn cache-dir
   ^java.io.File
   [{package-name :package/name
@@ -202,7 +185,7 @@
                  (.digest digest))
         (String. "UTF-8"))))
 
-(defn install-package [package force? verbose? global?]
+(defn install-package [package force? verbose? _global?]
   (when-let [package (find-package-descriptor package)]
     (let [artifacts (match-artifacts package)
           cdir (cache-dir package)
@@ -231,41 +214,60 @@
                                   (str/ends-with? filename ".tar.gz"))
                               (un-tgz cache-file ddir
                                       verbose?)))
-                      (make-executable ddir (:artifact/executables artifact) verbose?)
-                      (when global?
-                        (add-package-to-global package))))
+                      (make-executable ddir (:artifact/executables artifact) verbose?)))
                 (.getPath ddir))) artifacts)
       ddir)))
 
 (def path-sep (System/getProperty "path.separator"))
 
-(defn global-path []
-  (ensure-global-path-exists)
-  (let [installed (edn/read-string (slurp @global-install-file))
-        paths (reduce (fn [acc [k v]]
-                        (conj acc (.getPath (io/file @glam-dir
-                                                     "repository"
-                                                     (str k)
-                                                     (str v)))))
-                      []
-                      installed)]
-    (str/join path-sep paths)))
+
+(defn project-packages []
+  (let [glam-edn (io/file "glam.edn")]
+    (when (.exists glam-edn)
+      (let [edn (edn/read-string (slurp glam-edn))
+            deps (:glam/deps edn)
+            deps (mapv (fn [[k v]]
+                         (str k "@" v))
+                       deps)]
+        deps))))
+
+(defn global-packages []
+  (let [glam-edn (io/file @cfg-dir "glam.edn")]
+    (when (.exists glam-edn)
+      (let [edn (edn/read-string (slurp glam-edn))
+            deps (:glam/deps edn)
+            deps (mapv (fn [[k v]]
+                         (str k "@" v))
+                       deps)]
+        deps))))
 
 (defn install [packages force? verbose? global?]
-  (let [pkgs (keep find-package-descriptor packages)
-        paths (keep #(install-package % force? verbose? global?) pkgs)]
-    (if global?
-      (let [gp (global-path)
-            gpf (io/file @glam-dir "path")]
-        (spit gpf gp)
+  (let [global-pkgs (global-packages)
+        installed-glb (keep find-package-descriptor global-pkgs)
+        installed-glb (keep #(install-package % force? verbose? global?) installed-glb)
+        global-path (str/join path-sep installed-glb)
+        project-pkgs (project-packages)
+        installed-proj (keep find-package-descriptor project-pkgs)
+        installed-proj (keep #(install-package % force? verbose? global?) installed-proj)
+        proj-path (str/join path-sep installed-proj)
+        pkgs (keep find-package-descriptor packages)
+        pkgs (keep #(install-package % force? verbose? global?) pkgs)
+        path (str/join path-sep pkgs)
+        global-path-file (io/file @glam-dir "path")]
+    (spit global-path-file global-path)
+    (when verbose?
+      (warn "Wrote" (.getPath global-path-file)))
+    (when (.exists (io/file "glam.edn"))
+      (let [path-file (io/file ".glam" "path")]
+        (io/make-parents path-file)
+        (spit path-file proj-path)
         (when verbose?
-          (warn "Wrote" (.getPath gpf)))
-        gp)
-      {:path (str/join path-sep paths)
-       :exit (if (= (count packages)
-                    (count paths))
-               0
-               1)})))
+          (warn "Wrote" (.getPath path-file)))))
+    {:path path
+     :exit (if (= (+ (count global-pkgs) (count project-pkgs) (count packages))
+                  (+ (count installed-glb) (count installed-proj) (count pkgs)))
+             0
+             1)}))
 
 (defn pull-packages []
   (let [cfg (repo-config)]
@@ -286,23 +288,21 @@
             (sh "git" "-C" (.getParent repo-dir) "clone" git-url
                 (last (str/split (str repo-dir) #"/")))))))))
 
-(def default-repo-config
-  '[{:repo/name glam/core
-     :git/url "https://github.com/glam-pm/packages"}])
-
 (defn setup [force?]
   (let [glam-sh-dest (io/file @glam-dir "scripts" "glam.sh")]
     (io/make-parents glam-sh-dest)
     (spit glam-sh-dest (slurp (io/resource "borkdude/glam/scripts/glam.sh")))
-    (let [repo-cfg-file (io/file @cfg-dir "repositories.edn")]
-      (when (or (not (.exists repo-cfg-file))
+    (let [^java.io.File cfg-file @cfg-file]
+      (when (or (not (.exists cfg-file))
                 force?)
-        (io/make-parents repo-cfg-file)
-        (spit repo-cfg-file default-repo-config)))
+        (io/make-parents cfg-file)
+        (spit cfg-file (slurp (io/resource "borkdude/glam/glam.edn")))))
     (pull-packages)
     (warn "Include this in your .bashrc analog to finish setup:")
     (warn)
     (warn "source" "$HOME/.glam/scripts/glam.sh")))
+
+;;;; Package creation
 
 (defn artifact-sha [artifact]
   (when-let [k (:artifact/hash artifact)]

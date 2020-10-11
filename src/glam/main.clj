@@ -40,6 +40,7 @@
               (impl/install (get parsed "install")
                             (boolean (get parsed "--force"))
                             (boolean (get parsed "--verbose"))
+                            ;; not used anymore:
                             (boolean (or (get parsed "--global")
                                          (get parsed "-g"))))]
           (println path)
