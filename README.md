@@ -13,8 +13,8 @@ Work in progress, still in flux, not ready for production, breaking changes will
 
 ## Install
 
-Currently, glam relies on `git` (for downloading package repos) and `tar` (optional, for
-untarring `.tgz` archives) to be installed.
+Currently, glam relies on `git` (for downloading package repos) and `tar`
+(optional, for untarring `.tgz` archives).
 
 Navigate to the latest build on
 [CircleCI](https://app.circleci.com/pipelines/github/borkdude/glam) and download
