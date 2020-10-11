@@ -41,19 +41,21 @@ After setting up, you will find a `glam.edn` in `$HOME/.config/glam` with the fo
  :glam/deps {}}
 ```
 
-## Usage
+## Packages
 
 Package files like `<package-org>/<package-name>.glam.edn` are listed in package
-repos downloaded to `$HOME/.glam/packages`. The main package repo is in
-`$HOME/.glam/packages/glam/core`, but you can add your own repos in the config file.
-
-E.g. in`packages/glam/core` there is a `org.babashka/babashka.glam.edn`.
+repos specified in the global `glam.edn` config file under
+`:glam/repos`. Packages are cloned/pulled to `$HOME/.glam/packages`. The main
+package repo lives in `$HOME/.glam/packages/glam/core`. You can add your own
+repos in the config file and also change precedence by changing the order.
 
 To update package repos, run:
 
 ``` clojure
 $ glam pull
 ```
+
+## Usage
 
 ## Current shell
 
