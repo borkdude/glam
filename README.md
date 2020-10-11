@@ -13,21 +13,6 @@ Work in progress, still in flux, not ready for production, breaking changes will
 
 ## Install
 
-Glam can currently be used as a Clojure library. There will probably be a
-GraalVM compiled binary in the future.
-
-Install glam by using this alias in `deps.edn`:
-
-``` clojure
-:glam {:extra-deps
-       {borkdude/glam {:git/url "https://github.com/borkdude/glam"
-                       :sha "92e1a8ec285bb983ad1c2fba28837606c5c99ab6"}}
-        :main-opts ["-m" "glam.main"]}
-```
-
-Use any later SHA at your convenience or simply clone this project and use
-`:local/root`.
-
 Additionally, install a shell helper script and pull package repos by running
 this and following the instructions:
 
@@ -102,6 +87,26 @@ To install packages globally, add to `:glam/deps` in `$HOME/.config/glam/glam.ed
 To use the latest version, use `org.babashka/babashka :latest`.
 
 Run `glam install` and the global package should be added to the path.
+
+## Dev
+
+To develop glam using Clojure, you can invoke it using `clojure -M:glam` when
+adding this to `deps.edn`:
+
+``` clojure
+:glam {:extra-deps
+       {borkdude/glam {:git/url "https://github.com/borkdude/glam"
+                       :sha "<latest-sha>"}}
+        :main-opts ["-m" "glam.main"]}
+```
+
+You can re-install shell scripts using `clojure -M:glam setup --force`.
+
+You can override calling the binary in the shell script with `GLAM_CMD`, for example:
+
+``` clojure
+$ GLAM_CMD="clojure -M:glam" glam install
+```
 
 ## License
 
