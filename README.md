@@ -30,7 +30,7 @@ To finish setup, add this to your `.bashrc` analog:
 source $HOME/.glam/scripts/glam.sh
 ```
 
-To immediately start using glam, also execute the above in your own shell.
+To immediately start using glam, also execute the above in your shell.
 
 After setting up, you will find a `glam.edn` in `$HOME/.config/glam` with the following contents:
 
