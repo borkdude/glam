@@ -2,3 +2,6 @@
 test-dir
 .glam
 /glam.edn
+glam-bin
+classes
+

@@ -1,4 +1,5 @@
 (ns glam.main
+  (:gen-class)
   (:require [clojure.string :as str]
             [glam.impl.impl :as impl]))
 
