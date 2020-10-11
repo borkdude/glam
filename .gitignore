@@ -1,2 +1,4 @@
 .cpcache
 test-dir
+.glam
+/glam.edn
