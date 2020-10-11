@@ -13,6 +13,9 @@ Work in progress, still in flux, not ready for production, breaking changes will
 
 ## Install
 
+Currently, glam relies on `git` (for downloading package repos) and `tar` (optional, for
+untarring `.tgz` archives) to be installed.
+
 Navigate to the latest build on
 [CircleCI](https://app.circleci.com/pipelines/github/borkdude/glam) and download
 a binary for linux or macOS. Binaries for Windows are coming soon. Unzip the
@@ -46,7 +49,7 @@ Sample installation in a fresh Ubuntu docker image:
 ``` shell
 $ docker run -it --rm ubuntu /bin/bash
 
-# installing glam itself:
+# installing glam itself
 $ apt-get update && apt-get install curl git unzip -y
 $ curl -sLO https://30-298997735-gh.circle-artifacts.com/0/release/glam-0.0.1-SNAPSHOT-linux-amd64.zip
 $ unzip glam-0.0.1-SNAPSHOT-linux-amd64.zip
