@@ -13,20 +13,16 @@ Work in progress, still in flux, not ready for production, breaking changes will
 
 ## Install
 
-Glam currently uses the [Clojure
-CLI](https://clojure.org/guides/deps_and_cli). This will change: we will
-probably move to a GraalVM compiled binary.
+Glam can currently be used as a Clojure library. There will probably be a
+GraalVM compiled binary in the future.
 
 Install glam by using this alias in `deps.edn`:
 
 ``` clojure
 :glam {:extra-deps
        {borkdude/glam {:git/url "https://github.com/borkdude/glam"
-                       :sha "92e1a8ec285bb983ad1c2fba28837606c5c99ab6"}
-        ;; your-org/your-packages {,,,}
-        }
-       ;; :extra-paths ["your-packages"]
-       :main-opts ["-m" "glam.main"]}
+                       :sha "92e1a8ec285bb983ad1c2fba28837606c5c99ab6"}}
+        :main-opts ["-m" "glam.main"]}
 ```
 
 Use any later SHA at your convenience or simply clone this project and use
@@ -82,43 +78,43 @@ $ glam install clj-kondo/clj-kondo -g --verbose
 Wrote /Users/borkdude/.glam/path
 ```
 
-### Babashka
+<!-- ### Babashka -->
 
-Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast
-startup. You'll need version `0.2.2` or higher. First install it using `glam`:
+<!-- Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast -->
+<!-- startup. You'll need version `0.2.2` or higher. First install it using `glam`: -->
 
-``` clojure
-$ glam org.babashka/babashka -g
-```
+<!-- ``` clojure -->
+<!-- $ glam org.babashka/babashka -g -->
+<!-- ``` -->
 
-Glam automatically detects if you have a compatible `bb` installed, so next
-`glam` invocations are invoked using `bb`:
+<!-- Glam automatically detects if you have a compatible `bb` installed, so next -->
+<!-- `glam` invocations are invoked using `bb`: -->
 
-``` clojure
-$ time (glam)
-( glam; )   0.03s  user 0.03s system 93% cpu 0.065 total
-```
+<!-- ``` clojure -->
+<!-- $ time (glam) -->
+<!-- ( glam; )   0.03s  user 0.03s system 93% cpu 0.065 total -->
+<!-- ``` -->
 
-#### Uberjar
+<!-- #### Uberjar -->
 
-To bundle the package manager and packages into one asset e.g. for moving to another machine, use
-babashka's `--uberjar` option:
+<!-- To bundle the package manager and packages into one asset e.g. for moving to another machine, use -->
+<!-- babashka's `--uberjar` option: -->
 
-``` clojure
-$ bb -cp $(clojure -Spath -A:glam) -m glam.main --uberjar glam.jar
-```
+<!-- ``` clojure -->
+<!-- $ bb -cp $(clojure -Spath -A:glam) -m glam.main --uberjar glam.jar -->
+<!-- ``` -->
 
-This uberjar contains all packages from the classpath and the package manager
-itself. You can then run it from anywhere on your system:
+<!-- This uberjar contains all packages from the classpath and the package manager -->
+<!-- itself. You can then run it from anywhere on your system: -->
 
-``` clojure
-$ mv glam.jar /tmp
-$ cd /tmp
-$ bb -jar glam.jar install clj-kondo/clj-kondo -g --verbose
-...
-Wrote /Users/borkdude/.glam/path
-/Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
-```
+<!-- ``` clojure -->
+<!-- $ mv glam.jar /tmp -->
+<!-- $ cd /tmp -->
+<!-- $ bb -jar glam.jar install clj-kondo/clj-kondo -g --verbose -->
+<!-- ... -->
+<!-- Wrote /Users/borkdude/.glam/path -->
+<!-- /Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09 -->
+<!-- ``` -->
 
 ## License
 
