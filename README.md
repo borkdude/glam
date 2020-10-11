@@ -41,6 +41,26 @@ After setting up, you will find a `glam.edn` in `$HOME/.config/glam` with the fo
  :glam/deps {}}
 ```
 
+Sample installation in a fresh Ubuntu docker image:
+
+``` shell
+$ docker run -it --rm ubuntu /bin/bash
+
+# installing glam itself:
+$ apt-get update && apt-get install curl git unzip -y
+$ curl -sLO https://30-298997735-gh.circle-artifacts.com/0/release/glam-0.0.1-SNAPSHOT-linux-amd64.zip
+$ unzip glam-0.0.1-SNAPSHOT-linux-amd64.zip
+$ mv glam-bin /usr/local/bin
+$ source $HOME/.glam/scripts/glam.sh
+
+# installing clj-kondo and babashka:
+$ glam install clj-kondo/clj-kondo org.babashka/babashka
+$ clj-kondo --version
+clj-kondo v2020.09.09
+$ bb --version
+babashka v0.2.2
+```
+
 ## Packages
 
 Package files like `<package-org>/<package-name>.glam.edn` are listed in package
