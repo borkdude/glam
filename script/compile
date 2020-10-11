@@ -10,6 +10,8 @@ if [ -z "$GRAALVM_HOME" ]; then
     exit 1
 fi
 
+"$GRAALVM_HOME/bin/gu" install native-image
+
 "$GRAALVM_HOME/bin/native-image" \
     -cp "$(clojure -Spath):classes" \
     -H:Name=glam-bin \
