@@ -1,6 +1,6 @@
 # Glam
 
-A cross-platform package manager for projects that rock.
+A cross-platform package manager.
 
 Work in progress, still in flux, not ready for production, breaking changes will happen.
 
@@ -13,18 +13,22 @@ Work in progress, still in flux, not ready for production, breaking changes will
 
 ## Install
 
-Additionally, install a shell helper script and pull package repos by running
-this and following the instructions:
+Navigate to the latest build on CircleCI and download a binary for linux or
+macOS. Binaries for Windows are coming soon. Unzip the binary, place it on your path and run:
+
+``` clojure
+$ glam-bin setup
+```
+
+This installs a shell helper script and pulls the latest glam [packages](https://github.com/glam-pm/packages).
+
+To finish setup, add this to your `.bashrc` analog:
 
 ``` shell
-$ clojure -M:glam setup
-Include this in your .bashrc analog to finish setup:
-
 source $HOME/.glam/scripts/glam.sh
 ```
 
-Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by
-`clojure -M:glam` and append the printed path to `%PATH%` yourself.
+To immediately start using glam, also execute the above in your own shell.
 
 After setting up, you will find a `glam.edn` in `$HOME/.config/glam` with the following contents:
 
