@@ -292,12 +292,12 @@
 (defn setup [force?]
   (let [glam-sh-dest (io/file @glam-dir "scripts" "glam.sh")]
     (io/make-parents glam-sh-dest)
-    (spit glam-sh-dest (slurp (io/resource "borkdude/glam/scripts/glam.sh")))
+    (spit glam-sh-dest (slurp (io/resource "glam/scripts/glam.sh")))
     (let [^java.io.File cfg-file @cfg-file]
       (when (or (not (.exists cfg-file))
                 force?)
         (io/make-parents cfg-file)
-        (spit cfg-file (slurp (io/resource "borkdude/glam/glam.edn")))))
+        (spit cfg-file (slurp (io/resource "glam/glam.edn")))))
     (pull-packages)
     (warn "Include this in your .bashrc analog to finish setup:")
     (warn)
