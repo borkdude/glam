@@ -49,6 +49,12 @@ repos downloaded to `$HOME/.glam/packages`. The main package repo is in
 
 E.g. in`packages/glam/core` there is a `org.babashka/babashka.glam.edn`.
 
+To update package repos, run:
+
+``` clojure
+$ glam pull
+```
+
 ## Current shell
 
 To install packages for the current shell:

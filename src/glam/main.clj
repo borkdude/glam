@@ -49,6 +49,8 @@
         "setup"
         (let [parsed (parse-args (cons subc (rest args)))]
           (impl/setup (boolean (get parsed "--force"))))
+        "pull"
+        (impl/pull-packages)
         "package"
         (case (second args)
           "add"
