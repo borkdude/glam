@@ -1,4 +1,5 @@
 (ns glam.main
+  (:gen-class)
   (:require [clojure.string :as str]
             [glam.impl.impl :as impl]))
 
@@ -16,9 +17,13 @@
 (def boolean-flags
   #{"--force" "--verbose" "--global" "-g"})
 
+(def subcommands #{"install" "setup"
+                   "package" "add" "set-current"})
+
 (defn parse-args [args]
   (->> args
-       (split-when #(str/starts-with? % "-"))
+       (split-when #(or (str/starts-with? % "-")
+                        (contains? subcommands %)))
        (reduce (fn [acc [k & vs]]
                  (assoc acc k
                         (or vs
@@ -26,22 +31,36 @@
                               true))))
                {})))
 
-(def subcommand
-  {"install" "--install"
-   "setup" "--setup"})
+(defn main
+  [& args]
+  (when-let [subc (first args)]
+    (let [parsed (parse-args args)]
+      (case subc
+        "install"
+        (let [{:keys [:path :exit]}
+              (impl/install (get parsed "install")
+                            (boolean (get parsed "--force"))
+                            (boolean (get parsed "--verbose"))
+                            ;; not used anymore:
+                            (boolean (or (get parsed "--global")
+                                         (get parsed "-g"))))]
+          (println path)
+          exit)
+        "setup"
+        (let [parsed (parse-args (cons subc (rest args)))]
+          (impl/setup (boolean (get parsed "--force"))))
+        "pull"
+        (impl/pull-packages)
+        "package"
+        (case (second args)
+          "add"
+          (impl/package-add (get parsed "add"))
+          "set-current"
+          (impl/package-set-current (get parsed "set-current")))
+        ;; fallback:
+        (impl/warn "Unknown command:" subc)))))
 
 (defn -main [& args]
-  (when-let [subc* (first args)]
-    (let [subc (get subcommand subc* subc*)
-          args (cons subc (rest args))
-          parsed (parse-args args)]
-      (case subc
-        "--install"
-        (println (impl/path-with-pkgs (get parsed "--install")
-                                      (boolean (get parsed "--force"))
-                                      (boolean (get parsed "--verbose"))
-                                      (boolean (or (get parsed "--global")
-                                                   (get parsed "-g")))))
-        "--setup"
-        (impl/setup)
-        (impl/warn "Unknown command:" subc*)))))
+  (let [exit (apply main args)]
+    (shutdown-agents)
+    (System/exit (or exit 0))))

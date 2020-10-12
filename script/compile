@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+mkdir -p classes
+clojure -M -e "(compile 'glam.main)"
+
+if [ -z "$GRAALVM_HOME" ]; then
+    echo "Please set $GRAALVM_HOME"
+    exit 1
+fi
+
+"$GRAALVM_HOME/bin/gu" install native-image
+
+"$GRAALVM_HOME/bin/native-image" \
+    -cp "$(clojure -Spath):classes" \
+    -H:Name=glam-bin \
+    -H:+ReportExceptionStackTraces \
+    --initialize-at-build-time  \
+    "-H:Log=registerResource:" \
+    "-H:IncludeResources=glam/.*" \
+    "-H:EnableURLProtocols=http,https,jar" \
+    "--enable-all-security-services" \
+    --report-unsupported-elements-at-runtime \
+    --verbose \
+    --no-fallback \
+    --no-server \
+    "-J-Xmx3g" \
+    glam.main

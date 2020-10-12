@@ -1,52 +1,86 @@
 # Glam
 
-A cross-platform package manager for projects that rock.
+A cross-platform package manager.
 
-Glam offers a flexible way to bring binaries into scope globally or for just one shell.
+Work in progress, still in flux, not ready for production, breaking changes will happen.
 
-Work in progress, not ready for production, breaking changes will happen.
+## Goals
 
-Package PRs welcome.
+- Easy CI install of glam itself and the packages that it supports
+- Cross platform: support for linux, macOS and Windows (without relying on PowerShell)
+- Bring binaries into scope globally or just for one shell or directory
+- Configuration using [EDN](https://github.com/edn-format/edn)
 
 ## Install
 
-Glam uses the [Clojure CLI](https://clojure.org/guides/deps_and_cli).
+Currently, glam relies on `git` (for downloading package repos) and `tar`
+(optional, for untarring `.tgz` archives).
 
-Install glam by using this alias in `deps.edn`:
+Navigate to the latest build on
+[CircleCI](https://app.circleci.com/pipelines/github/borkdude/glam) and download
+a binary for linux or macOS. Binaries for Windows are coming soon. Unzip the
+binary, place it on your path and run:
 
 ``` clojure
-:glam {:extra-deps
-       {borkdude/glam {:git/url "https://github.com/borkdude/glam"
-                       :sha "92e1a8ec285bb983ad1c2fba28837606c5c99ab6"}
-        ;; your-org/your-packages {,,,}
-        }
-       ;; :extra-paths ["your-packages"]
-       :main-opts ["-m" "glam.main"]}
+$ glam-bin setup
 ```
 
-Use any later SHA at your convenience or simply clone this project and use
-`:local/root`.
+This installs a shell helper script and pulls the latest glam [packages](https://github.com/glam-pm/packages).
 
-Additionally, install a shell helper script by running this and following the instructions:
+To finish setup, add this to your `.bashrc` analog:
 
 ``` shell
-$ clojure -M:glam setup
-Include this in your .bashrc analog to finish setup:
-
 source $HOME/.glam/scripts/glam.sh
 ```
 
-Scripts for Windows will follow. Meanwhile you can replace `glam` invocations by
-`clojure -M:glam` and append the printed path to `%PATH%` yourself.
+To immediately start using glam, also execute the above in your shell.
+
+After setting up, you will find a `glam.edn` in `$HOME/.config/glam` with the following contents:
+
+``` clojure
+{:glam/repos
+ [{:repo/name glam/core
+   :git/url "https://github.com/glam-pm/packages"}]
+ :glam/deps {}}
+```
+
+Sample installation in a fresh Ubuntu docker image:
+
+``` shell
+$ docker run -it --rm ubuntu /bin/bash
+
+# installing glam itself
+$ apt-get update && apt-get install curl git unzip -y
+$ curl -sLO https://30-298997735-gh.circle-artifacts.com/0/release/glam-0.0.1-SNAPSHOT-linux-amd64.zip
+$ unzip glam-0.0.1-SNAPSHOT-linux-amd64.zip -d /usr/local/bin
+$ glam-bin setup
+$ source $HOME/.glam/scripts/glam.sh
+
+# installing clj-kondo and babashka:
+$ glam install clj-kondo/clj-kondo org.babashka/babashka
+$ clj-kondo --version
+clj-kondo v2020.09.09
+$ bb --version
+babashka v0.2.2
+```
+
+## Packages
+
+Package files like `<package-org>/<package-name>.glam.edn` are listed in package
+repos specified in the global `glam.edn` config file under
+`:glam/repos`. Packages are cloned/pulled to `$HOME/.glam/packages`. The main
+package repo lives in `$HOME/.glam/packages/glam/core`. You can add your own
+repos in the config file and also change precedence by changing the order.
+
+To update package repos, run:
+
+``` clojure
+$ glam pull
+```
 
 ## Usage
 
-Package files like `<package-org>/<package-name>.glam.edn` are discovered via
-the classpath. This means that in addition to glam's own packages you can add
-your own.
-
-E.g. in the glam repo's `packages` directory, there is a
-`org.babashka/babashka.glam.edn`.
+## Current shell
 
 To install packages for the current shell:
 
@@ -58,7 +92,7 @@ Now `clj-kondo` and `bb` are available:
 
 ``` clojure
 $ which bb
-/Users/borkdude/.glam/repository/org.babashka/babashka/0.2.1/bb
+/Users/borkdude/.glam/repository/org.babashka/babashka/0.2.2/bb
 $ which clj-kondo
 /Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09/clj-kondo
 $ bb '(+ 1 2 3)'
@@ -67,51 +101,52 @@ $ bb '(+ 1 2 3)'
 
 Use `--verbose` for more output, `--force` for re-downloading packages.
 
+To install a specific versions:
+
+``` clojure
+$ glam install clj-kondo/clj-kondo@2020.09.09 org.babashka/babashka@0.2.2
+```
+
+### Project
+
+To save installation settings for a project directory, create a `glam.edn` with the following contents:
+
+``` clojure
+{:glam/deps {org.babashka/babashka "0.2.2"}}
+```
+
+To use the latest version, use `{org.babashka/babashka :latest}`.
+
+Then run `glam install` and the deps should be added to the path.
+
 ### Global
 
-To install packages globally, use `--global` or `-g`.
+To install packages globally, add to `:glam/deps` in `$HOME/.config/glam/glam.edn`:
 
 ``` clojure
-$ glam install clj-kondo/clj-kondo -g --verbose
-...
-Wrote /Users/borkdude/.glam/path
+{org.babashka/babashka "0.2.2}
 ```
 
-### Babashka
+Run `glam install` and the global package should be added to the path.
 
-Glam can also run with [babashka](https://github.com/borkdude/babashka) for fast startup. Currently you will need the latest `0.2.2-SNAPSHOT` version. First install it using `glam`:
+## Dev
+
+To develop glam using Clojure, you can invoke it using `clojure -M:glam` when
+adding this to `deps.edn`:
 
 ``` clojure
-$ glam org.babashka/babashka@0.2.2-SNAPSHOT -g
+:glam {:extra-deps
+       {borkdude/glam {:git/url "https://github.com/borkdude/glam"
+                       :sha "<latest-sha>"}}
+        :main-opts ["-m" "glam.main"]}
 ```
 
-Glam automatically detects if you have a compatible `bb` installed, so next
-`glam` invocations are invoked using `bb`:
+You can re-install shell scripts using `clojure -M:glam setup --force`.
+
+You can override calling the binary in the shell script with `GLAM_CMD`, for example:
 
 ``` clojure
-$ time (glam)
-( glam; )   0.03s  user 0.03s system 93% cpu 0.065 total
-```
-
-#### Uberjar
-
-To bundle the package manager and packages into one asset e.g. for moving to another machine, use
-babashka's `--uberjar` option:
-
-``` clojure
-$ bb -cp $(clojure -Spath -A:glam) -m glam.main --uberjar glam.jar
-```
-
-This uberjar contains all packages from the classpath and the package manager
-itself. You can then run it from anywhere on your system:
-
-``` clojure
-$ mv glam.jar /tmp
-$ cd /tmp
-$ bb -jar glam.jar install clj-kondo/clj-kondo -g --verbose
-...
-Wrote /Users/borkdude/.glam/path
-/Users/borkdude/.glam/repository/org.babashka/babashka/SNAPSHOT:/Users/borkdude/.glam/repository/clj-kondo/clj-kondo/2020.09.09
+$ GLAM_CMD="clojure -M:glam" glam install
 ```
 
 ## License

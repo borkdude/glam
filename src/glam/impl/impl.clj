@@ -2,14 +2,21 @@
   {:no-doc true}
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :refer [sh]]
             [clojure.string :as str])
   (:import [java.net URL HttpURLConnection]
            [java.nio.file Files]))
 
 (set! *warn-on-reflection* true)
 
+(defn normalize-arch [arch]
+  (if (= "amd64" arch)
+    "x86_64"
+    arch))
+
 (def os {:os/name (System/getProperty "os.name")
-         :os/arch (System/getProperty "os.arch")})
+         :os/arch (let [arch (System/getProperty "os.arch")]
+                    (normalize-arch arch))})
 
 (defn warn [& strs]
   (binding [*out* *err*]
@@ -19,16 +26,19 @@
   (let [artifacts (:package/artifacts package)]
     (filter (fn [{os-name :os/name
                   os-arch :os/arch}]
-              (and (re-matches (re-pattern os-name) (:os/name os))
-                   (re-matches (re-pattern os-arch) (:os/arch os))))
+              (let [os-arch (normalize-arch os-arch)]
+                (and (re-matches (re-pattern os-name) (:os/name os))
+                     (re-matches (re-pattern os-arch)
+                                 (:os/arch os)))))
             artifacts)))
 
-(defn unzip [^java.io.File zip-file ^java.io.File destination-dir executables verbose?]
-  (when verbose? (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
+(defn unzip [{:keys [^java.io.File zip-file
+                     ^java.io.File destination-dir
+                     verbose]}]
+  (when verbose (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
   (let [output-path (.toPath destination-dir)
         zip-file (io/file zip-file)
-        _ (.mkdirs (io/file destination-dir))
-        executables (set executables)]
+        _ (.mkdirs (io/file destination-dir))]
     (with-open
       [fis (Files/newInputStream (.toPath zip-file) (into-array java.nio.file.OpenOption []))
        zis (java.util.zip.ZipInputStream. fis)]
@@ -36,20 +46,36 @@
         (let [entry (.getNextEntry zis)]
           (when entry
             (let [entry-name (.getName entry)
-                  new-path (.resolve output-path entry-name)
-                  resolved-path (.resolve output-path new-path)]
+                  new-path (.resolve output-path entry-name)]
               (if (.isDirectory entry)
                 (Files/createDirectories new-path (into-array []))
-                (do (Files/copy ^java.io.InputStream zis
-                                resolved-path
-                                ^"[Ljava.nio.file.CopyOption;"
-                                (into-array
-                                 [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
-                    (when (contains? executables entry-name)
-                      (let [f (.toFile resolved-path)]
-                        (when verbose? (warn "Making" (.getPath f) "executable."))
-                        (.setExecutable f true))))))
+                (Files/copy ^java.io.InputStream zis
+                            new-path
+                            ^"[Ljava.nio.file.CopyOption;"
+                            (into-array
+                             [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))))
             (recur)))))))
+
+(defn un-tgz [^java.io.File zip-file ^java.io.File destination-dir verbose?]
+  (when verbose? (warn "Unzipping" (.getPath zip-file) "to" (.getPath destination-dir)))
+  (let [tmp-file (java.io.File/createTempFile "glam" ".tar")
+        output-path (.toPath tmp-file)]
+    (with-open
+      [fis (Files/newInputStream (.toPath zip-file) (into-array java.nio.file.OpenOption []))
+       zis (java.util.zip.GZIPInputStream. fis)]
+      (Files/copy ^java.io.InputStream zis
+                  output-path
+                  ^"[Ljava.nio.file.CopyOption;"
+                  (into-array
+                   [java.nio.file.StandardCopyOption/REPLACE_EXISTING])))
+    (sh "tar" "xf" (.getPath tmp-file) "--directory" (.getPath destination-dir))
+    (.delete tmp-file)))
+
+(defn make-executable [dest-dir executables verbose?]
+  (doseq [e executables]
+    (let [f (io/file dest-dir e)]
+      (when verbose? (warn "Making" (.getPath f) "executable."))
+      (.setExecutable f true))))
 
 (defn download [source ^java.io.File dest verbose?]
   (when verbose? (warn "Downloading" source "to" (.getPath dest)))
@@ -63,97 +89,210 @@
       (io/copy is dest))
     (when verbose? (warn "Download complete."))))
 
-(defn destination-dir
+(def glam-dir
+  (delay (io/file (System/getProperty "user.home")
+                  ".glam")))
+
+(def cfg-dir
+  (delay (let [config-dir (or (System/getenv "XDG_CONFIG_HOME")
+                              (io/file (System/getProperty "user.home")
+                                       ".config"))]
+           (io/file config-dir "glam"))))
+
+(def cfg-file
+  (delay (io/file @cfg-dir "glam.edn")))
+
+(defn repo-config []
+  (:glam/repos (edn/read-string (slurp @cfg-file))))
+
+(defn repo-dir [repo-name]
+  (io/file @glam-dir "packages" (str repo-name)))
+
+(defn repo-dirs [repo-cfg]
+  (let [names (map :repo/name repo-cfg)]
+    (map repo-dir names)))
+
+(defn package-resource
+  ([package-name]
+   (package-resource package-name (repo-config)))
+  ([package-name repo-cfg]
+   (let [dirs (repo-dirs repo-cfg)
+         f (str package-name)]
+     (some (fn [dir]
+             (let [f (io/file dir f)]
+               (when (.exists f)
+                 f)))
+           dirs))))
+
+(defn find-package-descriptor [package]
+  (if (not (map? package))
+    (let [resource (str package ".glam.edn")]
+      (if-let [f (package-resource resource)]
+        (let [pkg (edn/read-string (slurp f))]
+          pkg)
+        ;; Template fallback
+        (let [[package version] (str/split package #"@")]
+          (if version
+            (let [template-resource (str package ".glam.template.edn")]
+              (if-let [f (package-resource template-resource)]
+                (let [pkg-str (slurp f)
+                      pkg-str (str/replace pkg-str "{{version}}" version)
+                      pkg (edn/read-string pkg-str)]
+                  (warn "Package" package "not found, attempting template fallback")
+                  pkg)
+                (warn "Package" package "not found")))
+            (warn "Package" package "not found")))))
+    package))
+
+(defn pkg-name [package]
+  (str (:package/name package) "@"
+       (:package/version package)))
+
+(defn cache-dir
   ^java.io.File
   [{package-name :package/name
     package-version :package/version}]
-  (io/file (System/getProperty "user.home")
+  (io/file (or
+            (System/getenv "XDG_CACHE_HOME")
+            (System/getProperty "user.home"))
            ".glam"
            "repository"
            (str package-name)
            package-version))
 
-(defn find-package-descriptor [package]
-  (if (not (map? package))
-    (let [;; package (str/replace (str package) "/" ".")
-          resource (str package ".glam.edn")]
-      (if-let [f (io/resource resource)]
-        (let [pkg (edn/read-string (slurp f))]
-          pkg)
-        (warn "Package" package "not found")))
-    package))
+(defn data-dir
+  ^java.io.File
+  [{package-name :package/name
+    package-version :package/version}]
+  (io/file (or
+            (System/getenv "XDG_DATA_HOME")
+            (System/getProperty "user.home"))
+           ".glam"
+           "repository"
+           (str package-name)
+           package-version))
 
-(defn pkg-name [package]
-  (:package/name package))
+(defn sha256 [file]
+  (let [buf (byte-array 8192)
+        digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (with-open [bis (io/input-stream (io/file file))]
+      (loop []
+        (let [count (.read bis buf)]
+          (when (pos? count)
+            (.update digest buf 0 count)
+            (recur)))))
+    (-> (.encode (java.util.Base64/getEncoder)
+                 (.digest digest))
+        (String. "UTF-8"))))
 
-(def ^java.io.File glam-dir
-  (io/file (System/getProperty "user.home")
-           ".glam"))
-
-(def ^java.io.File global-install-file
-  (io/file glam-dir
-           "installed.edn"))
-
-(defn ensure-global-path-exists []
-  (when-not (.exists global-install-file)
-    (spit global-install-file "")))
-
-(defn add-package-to-global [package]
-  (ensure-global-path-exists)
-  (let [installed (edn/read-string (slurp global-install-file))
-        installed (assoc installed (:package/name package) (:package/version package))]
-    (spit global-install-file installed)))
-
-(defn install-package [package force? verbose? global?]
+(defn install-package [package force? verbose? _global?]
   (when-let [package (find-package-descriptor package)]
     (let [artifacts (match-artifacts package)
-          dest-dir (destination-dir package)]
+          cdir (cache-dir package)
+          ddir (data-dir package)]
       (mapv (fn [artifact]
               (let [url (:artifact/url artifact)
                     file-name (last (str/split url #"/"))
-                    dest-file (io/file dest-dir file-name)]
-                (if (and (not force?) (.exists dest-file))
+                    cache-file (io/file cdir file-name)]
+                (if (and (not force?) (.exists cdir))
                   (when verbose?
                     (warn "Package" (pkg-name package) "already installed"))
-                  (do (download url dest-file verbose?)
-                      (unzip dest-file dest-dir
-                             (:artifact/executables artifact)
-                             verbose?)
-                      (when global?
-                        (add-package-to-global package))))
-                (.getPath dest-dir))) artifacts)
-      dest-dir)))
+                  (do (download url cache-file verbose?)
+                      (when-let [expected-sha (:artifact/hash artifact)]
+                        (let [sha (sha256 cache-file)]
+                          (when-not (= (str/replace expected-sha #"^sha256:" "")
+                                       sha)
+                            (throw (ex-info (str "Wrong SHA-256 for file" (str cache-file))
+                                            {:sha sha
+                                             :expected-sha expected-sha})))))
+                      (let [filename (.getName cache-file)]
+                        (cond (str/ends-with? filename ".zip")
+                              (unzip {:zip-file cache-file
+                                      :destination-dir ddir
+                                      :verbose verbose?})
+                              (or (str/ends-with? filename ".tgz")
+                                  (str/ends-with? filename ".tar.gz"))
+                              (un-tgz cache-file ddir
+                                      verbose?)))
+                      (make-executable ddir (:artifact/executables artifact) verbose?)))
+                (.getPath ddir))) artifacts)
+      ddir)))
 
 (def path-sep (System/getProperty "path.separator"))
 
-(defn global-path []
-  (ensure-global-path-exists)
-  (let [installed (edn/read-string (slurp global-install-file))
-        paths (reduce (fn [acc [k v]]
-                        (conj acc (.getPath (io/file glam-dir
-                                                     "repository"
-                                                     (str k)
-                                                     (str v)))))
-                      []
-                      installed)]
-    (str/join path-sep paths)))
 
-(defn path-with-pkgs [packages force? verbose? global?]
-  (let [packages (keep find-package-descriptor packages)
-        paths (mapv #(install-package % force? verbose? global?) packages)]
-    (if global?
-      (let [gp (global-path)
-            gpf (io/file glam-dir "path")]
-        (spit gpf gp)
+(defn project-packages []
+  (let [glam-edn (io/file "glam.edn")]
+    (when (.exists glam-edn)
+      (let [edn (edn/read-string (slurp glam-edn))
+            deps (:glam/deps edn)
+            deps (mapv (fn [[k v]]
+                         (str k "@" v))
+                       deps)]
+        deps))))
+
+(defn global-packages []
+  (let [glam-edn (io/file @cfg-dir "glam.edn")]
+    (when (.exists glam-edn)
+      (let [edn (edn/read-string (slurp glam-edn))
+            deps (:glam/deps edn)
+            deps (mapv (fn [[k v]]
+                         (str k (when-not (identical? v :latest)
+                                  (str "@" v))))
+                       deps)]
+        deps))))
+
+(defn install [packages force? verbose? global?]
+  (let [global-pkgs (global-packages)
+        installed-glb (keep find-package-descriptor global-pkgs)
+        installed-glb (keep #(install-package % force? verbose? global?) installed-glb)
+        global-path (str/join path-sep installed-glb)
+        project-pkgs (project-packages)
+        installed-proj (keep find-package-descriptor project-pkgs)
+        installed-proj (keep #(install-package % force? verbose? global?) installed-proj)
+        proj-path (str/join path-sep installed-proj)
+        pkgs (keep find-package-descriptor packages)
+        pkgs (keep #(install-package % force? verbose? global?) pkgs)
+        path (str/join path-sep pkgs)
+        global-path-file (io/file @glam-dir "path")]
+    (spit global-path-file global-path)
+    (when verbose?
+      (warn "Wrote" (.getPath global-path-file)))
+    (when (.exists (io/file "glam.edn"))
+      (let [path-file (io/file ".glam" "path")]
+        (io/make-parents path-file)
+        (spit path-file proj-path)
         (when verbose?
-          (warn "Wrote" (.getPath gpf)))
-        gp)
-      (str/join path-sep paths))))
+          (warn "Wrote" (.getPath path-file)))))
+    {:path path
+     :exit (if (= (+ (count global-pkgs) (count project-pkgs) (count packages))
+                  (+ (count installed-glb) (count installed-proj) (count pkgs)))
+             0
+             1)}))
+
+(defn pull-packages []
+  (let [cfg (repo-config)]
+    (doseq [{repo-name :repo/name
+             git-url   :git/url} cfg]
+      (let [repo-dir (io/file (io/file (System/getProperty "user.home")
+                                       ".glam" "packages")
+                              (str repo-name))
+            exists? (.exists (io/file repo-dir ".git"))]
+        (if exists?
+          (do
+            (warn "Pulling" git-url "to" (str repo-dir))
+            ;; TODO: error handling
+            (sh "git" "-C" (.getPath repo-dir) "pull" git-url))
+          (do
+            (.mkdirs repo-dir)
+            (warn "Cloning" git-url "to" (str repo-dir))
+            (sh "git" "-C" (.getParent repo-dir) "clone" git-url
+                (last (str/split (str repo-dir) #"/")))))))))
 
 (def windows?
   (str/starts-with? (:os/name os) "Win"))
 
-(defn setup []
+#_(defn setup []
   (let [scripts ["glam.sh" "glam.cmd"]
         script-dir (io/file glam-dir "scripts")]
     (.mkdirs script-dir)
@@ -165,3 +304,72 @@
       (do (warn "Include this in your .bashrc analog to finish setup:")
           (warn)
           (warn "source" "$HOME/.glam/scripts/glam.sh")))))
+
+(defn setup [force?]
+  (let [scripts ["glam.sh" "glam.cmd"]
+        script-dir (io/file @glam-dir "scripts")]
+    (.mkdirs script-dir)
+    (doseq [s scripts]
+      (let [script-file (io/file script-dir s)]
+        (spit script-file (slurp (io/resource (str "glam/scripts/" s))))))
+    (let [^java.io.File cfg-file @cfg-file]
+      (when (or (not (.exists cfg-file))
+                force?)
+        (io/make-parents cfg-file)
+        (spit cfg-file (slurp (io/resource "glam/glam.edn")))))
+    (pull-packages)
+    (warn)
+    (if windows?
+      (warn "Add" (str script-dir) "to %PATH% to finish setup.")
+      (do (warn "Include this in your .bashrc analog to finish setup:")
+          (warn)
+          (warn "source" "$HOME/.glam/scripts/glam.sh")))))
+
+;;;; Package creation
+
+(defn artifact-sha [artifact]
+  (when-let [k (:artifact/hash artifact)]
+    (let [url (:artifact/url artifact)
+          tmp-file (java.io.File/createTempFile "glam" "glam")
+          _ (download url tmp-file true)
+          sha (sha256 tmp-file)
+          _ (.delete tmp-file)]
+      [k sha])))
+
+(defn calculate-hashes [pkg]
+  (map artifact-sha (:package/artifacts pkg)))
+
+(defn package-add [[package]]
+  (let [[package version] (str/split package #"@")]
+    (if version
+      (let [template-resource (str package ".glam.template.edn")
+            f (io/file template-resource)]
+        (if (.exists f)
+          (let [pkg-dir (-> f .getParentFile .getParentFile)
+                pkg-str (slurp f)
+                pkg-str (str/replace pkg-str "{{version}}" version)
+                pkg-edn (edn/read-string pkg-str)
+                replacements (calculate-hashes pkg-edn)
+                pkg-str (reduce (fn [acc [k v]]
+                                  (str/replace acc k (str "sha256:" v)))
+                                pkg-str
+                                replacements)
+                pkg-file (io/file pkg-dir (str package "@" version ".glam.edn"))]
+            (spit pkg-file pkg-str)
+            (warn "Package created at" (str pkg-file)))
+          (warn "No template found")))
+      (warn "Please specify version using @version"))))
+
+(defn package-set-current [[package-with-version]]
+  (let [[package version] (str/split package-with-version #"@")]
+    (if version
+      (let [resource (str package-with-version ".glam.edn")
+            f (io/file resource)]
+        (if (.exists f)
+          (let [pkg-dir (-> f .getParentFile .getParentFile)
+                pkg-str (slurp f)
+                pkg-file (io/file pkg-dir (str package ".glam.edn"))]
+            (spit pkg-file pkg-str)
+            (warn "Package created at" (str pkg-file)))
+          (warn "Package not found:" package-with-version)))
+      (warn "Please specify version using @version"))))
