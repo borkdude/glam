@@ -136,8 +136,7 @@ adding this to `deps.edn`:
 
 ``` clojure
 :glam {:extra-deps
-       {borkdude/glam {:git/url "https://github.com/borkdude/glam"
-                       :sha "<latest-sha>"}}
+       {borkdude/glam {:local/root "/your/dev/glam"}}
         :main-opts ["-m" "glam.main"]}
 ```
 

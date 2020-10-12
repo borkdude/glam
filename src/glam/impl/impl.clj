@@ -292,19 +292,6 @@
 (def windows?
   (str/starts-with? (:os/name os) "Win"))
 
-#_(defn setup []
-  (let [scripts ["glam.sh" "glam.cmd"]
-        script-dir (io/file glam-dir "scripts")]
-    (.mkdirs script-dir)
-    (doseq [s scripts]
-      (spit (io/file script-dir s)
-            (slurp (io/resource (str "borkdude/glam/scripts/" s)))))
-    (if windows?
-      (warn "Add" (str script-dir) "to %PATH% to finish setup.")
-      (do (warn "Include this in your .bashrc analog to finish setup:")
-          (warn)
-          (warn "source" "$HOME/.glam/scripts/glam.sh")))))
-
 (defn setup [force?]
   (let [scripts ["glam.sh" "glam.cmd"]
         script-dir (io/file @glam-dir "scripts")]
