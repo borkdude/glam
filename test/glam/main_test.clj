@@ -35,7 +35,7 @@
   (let [cache-dir (io/file "test-dir" ".cache" ".glam" "repository" "clj-kondo" "clj-kondo" "2020.09.09")
         data-dir (io/file "test-dir" ".data" ".glam" "repository" "clj-kondo" "clj-kondo" "2020.09.09")
         config-file (io/file "glam.edn")
-        _ (spit config-file "{:glam/deps {clj-kondo/clj-kondo \"2020.09.09\"}}")
+        _ (spit config-file "{:glam/deps {clj-kondo/clj-kondo {:dep/version \"2020.09.09\"}}}")
         clj-kondo-executable (io/file data-dir "clj-kondo")
         _ (with-out-str (main/main "install"))]
     (is (.exists cache-dir) (str cache-dir " doesn't exist"))

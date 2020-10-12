@@ -220,14 +220,19 @@
 
 (def path-sep (System/getProperty "path.separator"))
 
+(defn dep-with-version-suffix [dep-name m]
+  (let [v (:dep/version m)]
+    (str dep-name
+         (when-not (identical? :latest v)
+           (str "@" v)))))
 
 (defn project-packages []
   (let [glam-edn (io/file "glam.edn")]
     (when (.exists glam-edn)
       (let [edn (edn/read-string (slurp glam-edn))
             deps (:glam/deps edn)
-            deps (mapv (fn [[k v]]
-                         (str k "@" v))
+            deps (mapv (fn [[k m]]
+                         (dep-with-version-suffix k m))
                        deps)]
         deps))))
 
@@ -236,9 +241,8 @@
     (when (.exists glam-edn)
       (let [edn (edn/read-string (slurp glam-edn))
             deps (:glam/deps edn)
-            deps (mapv (fn [[k v]]
-                         (str k (when-not (identical? v :latest)
-                                  (str "@" v))))
+            deps (mapv (fn [[k m]]
+                         (dep-with-version-suffix k m))
                        deps)]
         deps))))
 

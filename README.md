@@ -112,10 +112,10 @@ $ glam install clj-kondo/clj-kondo@2020.09.09 org.babashka/babashka@0.2.2
 To save installation settings for a project directory, create a `glam.edn` with the following contents:
 
 ``` clojure
-{:glam/deps {org.babashka/babashka "0.2.2"}}
+{:glam/deps {org.babashka/babashka {:dep/version "0.2.2"}}}
 ```
 
-To use the latest version, use `{org.babashka/babashka :latest}`.
+To use the latest version, use `{org.babashka/babashka {:dep/version :latest}}`.
 
 Then run `glam install` and the deps should be added to the path.
 
@@ -124,7 +124,7 @@ Then run `glam install` and the deps should be added to the path.
 To install packages globally, add to `:glam/deps` in `$HOME/.config/glam/glam.edn`:
 
 ``` clojure
-{org.babashka/babashka "0.2.2}
+{org.babashka/babashka {:dep/version "0.2.2}}
 ```
 
 Run `glam install` and the global package should be added to the path.
