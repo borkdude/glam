@@ -7,7 +7,7 @@ GLAM_LOCAL_PATH=""
 GLAM_SYS_PATH=$PATH
 
 glam_global_path() {
-    if [ -f "$HOME/.glam/path" ]
+    if [ -s "$HOME/.glam/path" ]
     then
         GLAM_GLOBAL_PATH=$(cat "$HOME"/.glam/path)
         PATH="$GLAM_GLOBAL_PATH:$PATH"
@@ -15,10 +15,10 @@ glam_global_path() {
 }
 
 glam_local_path() {
-    if [ -f ".glam/path" ]
+    if [ -s ".glam/path" ]
     then
-        GLAM_LOCAL_PATH=$(cat "$HOME"/.glam/path)
-        PATH="$GLAM_GLOBAL_PATH:$PATH"
+        GLAM_LOCAL_PATH=$(cat .glam/path)
+        PATH="$GLAM_LOCAL_PATH:$PATH"
     fi
 }
 
