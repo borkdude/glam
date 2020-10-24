@@ -223,7 +223,7 @@
 (defn dep-with-version-suffix [dep-name m]
   (let [v (:dep/version m)]
     (str dep-name
-         (when-not (identical? :latest v)
+         (when (and v (not (identical? :latest v)))
            (str "@" v)))))
 
 (defn project-packages []
