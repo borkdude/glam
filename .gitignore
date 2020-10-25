@@ -4,4 +4,9 @@ test-dir
 /glam.edn
 glam-bin
 classes
-
+glam-0.0.1-SNAPSHOT-windows-amd64.zip
+glam-bin.exe
+glam-bin.exp
+glam-bin.lib
+glam-bin.pdb
+glam-bin.stripped.pdb
