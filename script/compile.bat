@@ -34,6 +34,8 @@ call %GRAALVM_HOME%\bin\native-image.cmd ^
   "-J-Dclojure.spec.skip-macros=true" ^
   "-J-Dclojure.compiler.direct-linking=true" ^
   "--report-unsupported-elements-at-runtime" ^
+  "-H:EnableURLProtocols=http,https,jar" ^
+  "--enable-all-security-services" ^
   "--verbose" ^
   "--no-fallback" ^
   "--no-server" ^
